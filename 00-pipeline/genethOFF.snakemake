@@ -110,8 +110,8 @@ if identical_values.all():
     ## check there is no "-" in sample name
     strings_with_hyphen = [item for item in samples_unique if "-" in item]
     if strings_with_hyphen:
-        print(f"{RED} !! '-' detected in the following sample name :", strings_with_hyphen,"\n Please modify sample name and replace '-' by another delimiter")
-        sys.exit(1)
+      print(f"{RED} !! '-' detected in the following sample name :", strings_with_hyphen,"\n Please modify sample name and replace '-' by another delimiter")
+      sys.exit(1)
     else:
       
       genomes=my_list["Genome"].tolist()
@@ -409,14 +409,16 @@ rule demux_I2:
     I2=temp("00-demultiplexing/{sample}-1_i2_I2.fastq.gz")
   conda: "GENETHOFF"
   log: R1= "logs/demultiplexing_{sample}_i2_R1.log"
+  params: UMI_side=str(config["UMI_side"]) ## either 5 (left) or 3 (right)
   threads: 6
   shell: """
-        
-        cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_i2_I2.fastq.gz -p 00-demultiplexing/{{name}}_i2_R1.fastq.gz {input.I2} {input.R1} > {log.R1}
-        
-        cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_i2_I2.fastq.gz -p 00-demultiplexing/{{name}}_i2_R2.fastq.gz {input.I2} {input.R2} > /dev/null
-        
-        #rm 00-demultiplexing/*unknown* 
+        if [ {params.UMI_side} = "3" ]; then
+          cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_i2_I2.fastq.gz -p 00-demultiplexing/{{name}}_i2_R1.fastq.gz {input.I2} {input.R1} > {log.R1}
+          cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_i2_I2.fastq.gz -p 00-demultiplexing/{{name}}_i2_R2.fastq.gz {input.I2} {input.R2} > /dev/null
+        else
+          cutadapt -a file$:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_i2_I2.fastq.gz -p 00-demultiplexing/{{name}}_i2_R1.fastq.gz {input.I2} {input.R1} > {log.R1}
+          cutadapt -a file$:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_i2_I2.fastq.gz -p 00-demultiplexing/{{name}}_i2_R2.fastq.gz {input.I2} {input.R2} > /dev/null
+        fi
         """
 
 
@@ -905,13 +907,14 @@ rule make_report:
         Rscript ../00-pipeline/publish_report.r {input} {params.config_path} {output.report_html}
         Rscript ../00-pipeline/publish_report_pdf.r {input} {params.config_path} {output.report_pdf}
     """
+
 onsuccess:
     print("Workflow finished, no error")
-    shell("conda run -n GENETHOFF echo 'You rock baby !' | cowpy -e greedy")
-    if config["clean_intermediates_files"] == "TRUE":
+    shell("conda run -n GENETHOFF bash ../02-ressources/success.sh")
+    if config["clean_intermediates_files"].lower() == "true":
       shell("rm -r 0*/")
 
 onerror:
     print("An error occurred")
-    shell("conda run -n GENETHOFF echo 'Houston, we have a problem' | cowpy -e dead -c mutilated")
+    shell("conda run -n GENETHOFF bash ../02-ressources/error.sh")
 

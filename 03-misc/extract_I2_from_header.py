@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """
-Script pour extraire l'index d'un read FASTQ depuis le header
-et remplacer la séquence par cet index.
-Traite des fichiers FASTQ.gz en entrée et sortie.
+Extract BC and UMI from reads header if it exists
 """
 
 from Bio import SeqIO
@@ -14,44 +12,45 @@ import sys
 
 def extract_index_from_header(header):
     """
-    Extrait l'index après le '+' dans le header FASTQ.
+    Extract index after '+' in header in R2 FASTQ file.
     
     Args:
-        header: Description du header FASTQ
+        header: Description part of the FASTQ header
     
     Returns:
-        L'index extrait ou None si non trouvé
+        Index if found
     """
-    if '+' in header:
-        index = header.split('+', 1)[1].strip()
+    idx=header.find('+')
+    if idx != -1:
+        index = header[idx + 1:]
         return index
-    return None
+    else:
+        print("No index found. Cannot continue processing this sample")
+        sys.exit(1)
 
 
 def process_fastq_gz(input_file, output_file):
     """
-    Traite un fichier FASTQ.gz en remplaçant les séquences par leurs index.
-    Écrit les reads au fur et à mesure (streaming).
+    Take R2 fastq file and extract BC2 and UMI sequences.
     
     Args:
-        input_file: Chemin du fichier FASTQ.gz d'entrée
-        output_file: Chemin du fichier FASTQ.gz de sortie
+        input_file: path to input FASTQ.gz
+        output_file: path to output FASTQ.gz
     
     Returns:
-        Nombre de reads traités
+        Number of treated reads
     """
     nb_with_index = 0
     nb_without_index = 0
     total_reads = 0
     
     # Compte d'abord le nombre total de reads
-    print(f"Comptage des reads dans {input_file}...")
+    print(f"Counting reads in {input_file}...")
     with gzip.open(input_file, 'rt') as handle:
-        for _ in SeqIO.parse(handle, "fastq"):
-            total_reads += 1
+        total_reads = sum(1 for _ in handle) // 4
     
-    print(f"Total: {total_reads} reads à traiter\n")
-    print(f"Traitement et écriture en cours...")
+    print(f"Total: {total_reads} reads to process\n")
+    print(f"Writting output file...")
     
     # Traite et écrit les reads au fur et à mesure
     with gzip.open(input_file, 'rt') as input_handle, \
@@ -61,11 +60,12 @@ def process_fastq_gz(input_file, output_file):
             # Affiche la progression tous les 1000 reads
             if i % 1000 == 0:
                 percentage = (i / total_reads) * 100
-                print(f"  Traités: {i}/{total_reads} reads ({percentage:.1f}%)...", end='\r')
+                print(f"  Treated: {i}/{total_reads} reads ({percentage:.1f}%)...", end='\r')
             
             # Extrait l'index du header
             index_seq = extract_index_from_header(record.description)
-            
+
+
             if index_seq:
                 # Crée un nouveau record avec l'index comme séquence
                 new_record = SeqRecord(
@@ -82,11 +82,11 @@ def process_fastq_gz(input_file, output_file):
                 SeqIO.write(record, output_handle, "fastq")
                 nb_without_index += 1
     
-    print(f"  Traités: {total_reads} reads (100.0%) - Terminé!  ")
+    print(f"  Treated: {total_reads} reads (100.0%) - Completed !  ")
     
-    print(f"\nTraitement terminé:")
-    print(f"  - {nb_with_index} reads avec index (séquence remplacée)")
-    print(f"  - {nb_without_index} reads sans index (séquence conservée)")
+    print(f"\n Extraction completed:")
+    print(f"  - {nb_with_index} reads with index")
+    print(f"  - {nb_without_index} reads without index")
     print(f"  - Total: {total_reads} reads")
     
     return total_reads
@@ -107,8 +107,8 @@ if __name__ == "__main__":
     try:
         process_fastq_gz(input_file, output_file)
     except FileNotFoundError:
-        print(f"Erreur: Le fichier {input_file} n'existe pas.")
+        print(f"Erreur: File {input_file} doesn't exists.")
         sys.exit(1)
     except Exception as e:
-        print(f"Erreur lors du traitement: {e}")
+        print(f"Error while processing: {e}")
         sys.exit(1)

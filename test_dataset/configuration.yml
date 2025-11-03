@@ -4,9 +4,12 @@ affiliation: "Therapeutic Gene Editing - GENETHON, INSERM U951, Paris-Saclay Uni
 contact: "gcorre@genethon.fr"
 version: 'V1.0'
 
-clean_intermediates_files: 'TRUE'
 
-skip_demultiplexing: "TRUE"
+## Main options
+clean_intermediates_files: 'TRUE'
+skip_demultiplexing: 'FALSE'
+#quantification: "umi" # use "umi" or "fragment" for the quantification (only if rescue_R2 is 'FALSE")
+rescue_R2: "TRUE"     # Rescue R2 reads if R1 is too short or the pair doesn't align properly.
 
 ## Library informations
 sampleInfo_path: "test_datasheet.csv"
@@ -41,7 +44,6 @@ minLength: 25 ## Minimal read length after trimming, before alignment
 aligner: "bowtie2"   ## Aligner to use (bowtie2 or bwa)
 minFragLength: 100         # Minimal fragment length after alignment
 maxFragLength: 1500        # Maximal fragment length after alignment 
-rescue_R2: "TRUE"     # Rescur R2 reads if R1 is too short or the pair doesn't align properly.
 
 ################################################
 
@@ -52,7 +54,7 @@ UMI_hamming_distance: 1         # min distance to cluster UMI using network-base
 UMI_deduplication: "Adjacency"  # method to correct UMI (cluster or Adjacency)
 UMI_pattern: "NNWNNWNN"  
 UMI_filter: "TRUE"              # If TRUE, remove UMIs that do no match the expected pattern [FALSE or TRUE]
-UMI_side: "5"
+UMI_side: "5"                   # position of the UMI in the I2 read sequence (ie UMI+BC -> "5" or BC+UMI --> "3")
 ################################################
 
 

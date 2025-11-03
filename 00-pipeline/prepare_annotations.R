@@ -26,6 +26,9 @@ file <- args[2]
   # replace rename gene_type gene_biotype if necessary
   if ("gene_type" %in% colnames(GenomicRanges::mcols(gtf))) {
     gtf$gene_biotype <- gtf$gene_type
+  } else {
+    cat("Error: Missing column. Please make sure your GTF file includes a 'gene_biotype' or 'gene_type' column \n", file = stderr())
+    sys.exit(1)
   }
   
   # select only columns of interest
@@ -35,4 +38,3 @@ file <- args[2]
     mutate(gene_name = case_when(is.na(gene_name)~ gene_id,TRUE ~ gene_name))
   
   saveRDS(object = gtf, file = paste("../02-ressources/",species,".rds",sep = "" ))
-  
