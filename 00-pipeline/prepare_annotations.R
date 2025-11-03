@@ -16,6 +16,7 @@ args <- commandArgs(trailingOnly = T)
 
 species <- args[1]
 file <- args[2]
+output <- args[3]
 
 # build annotation objects ----------------------------------------------------------
 
@@ -37,4 +38,4 @@ file <- args[2]
     dplyr::select(gene_id,gene_name,transcript_id,gene_biotype,type) %>% 
     mutate(gene_name = case_when(is.na(gene_name)~ gene_id,TRUE ~ gene_name))
   
-  saveRDS(object = gtf, file = paste("../02-ressources/",species,".rds",sep = "" ))
+  saveRDS(object = gtf, file = paste(output,"/../02-ressources/",species,".rds",sep = "" ))

@@ -52,7 +52,7 @@ if(exists("clusters_grna_match") && nrow(clusters_grna_match)>0){
   
   
   # load pre-prepared annotation GRange object
-  gtf <- readRDS(paste("../02-ressources/",annotation,".rds",sep=""))
+  gtf <- readRDS(annotation)
   
   # convert OT to gRanges -----------------------------------------------------
   results_granges <- makeGRangesFromDataFrame(results_df, 

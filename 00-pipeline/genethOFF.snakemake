@@ -24,8 +24,8 @@ RED= "\033[91m"
 GREEN= "\033[92m"
 RESET= "\033[0m"
 
-
-os.system("cat ../03-misc/logo.txt; echo '\n'")
+#print(workflow.basedir)
+os.system("cat "+workflow.basedir+"/../03-misc/logo.txt; echo '\n'")
 
 ###############################################################
 # check that the config file is present in current folder
@@ -292,7 +292,7 @@ rule target:
 
 rule get_chrom_length:
     input: lambda wildcards: config["genome"][wildcards.genome]["fasta"]
-    output: "../02-ressources/{genome}.chrom.length"
+    output: workflow.basedir+"/../02-ressources/{genome}.chrom.length"
     threads: 1
     conda: "GENETHOFF"
     params: lambda wildcards: config["genome"][wildcards.genome]["fasta"]+".fai"
@@ -308,12 +308,12 @@ rule get_chrom_length:
 
 rule prepare_annotations:
     input: lambda wildcards: config["genome"][wildcards.genome]["annotation"]
-    output: "../02-ressources/{genome}.rds"
+    output:  workflow.basedir+"/../02-ressources/{genome}.rds"
     threads: 1
     conda: "GENETHOFF"
     shell: """
-        Rscript ../00-pipeline/prepare_annotations.R {wildcards.genome} {input}
-    """     
+        Rscript {workflow.basedir}/prepare_annotations.R {wildcards.genome} {input} {workflow.basedir}
+    """    
 
 # make a barcode file with I1 sequences for demultiplexing.
 rule make_indexes_fasta_i1:
@@ -448,7 +448,7 @@ rule make_I2:
   threads: 1
   conda: "GENETHOFF"
   shell: """
-    python ../03-misc/extract_I2_from_header.py {input} {output}
+    python {workflow.basedir}/../03-misc/extract_I2_from_header.py {input} {output}
   """
   
 
@@ -742,7 +742,7 @@ rule correct_UMI:
     threads: 2
     params: hamming=config["UMI_hamming_distance"], filter = config["UMI_filter"],  UMI=config["UMI_pattern"], method = config["UMI_deduplication"], rescueR2=config["rescue_R2"]
     shell: """
-        Rscript ../00-pipeline/correct_umi.R {input.bed} {params.UMI} {params.filter} {params.hamming} {params.method} {output} {params.rescueR2}
+        Rscript {workflow.basedir}/correct_umi.R {input.bed} {params.UMI} {params.filter} {params.hamming} {params.method} {output} {params.rescueR2}
         """
 
 
@@ -771,7 +771,7 @@ rule Collapse_UMI_IS:
 rule get_fasta_around_is:
     input: 
       bed=rules.Collapse_UMI_IS.output.collapse,
-      length=["../02-ressources/{genome}.chrom.length".format(genome=genome) for genome in genomes_unique]
+      length=[workflow.basedir+"/../02-ressources/{genome}.chrom.length".format(genome=genome) for genome in genomes_unique]
     output: 
       cluster="04-IScalling/{sample}.cluster_slop.bed",
       fa="04-IScalling/{sample}.cluster_slop.fa"
@@ -866,18 +866,18 @@ rule report_data:
      bulges=config["tolerate_bulges"],
      pam_side=lambda wildcards:samples["PAM_side"][wildcards.sample]
     shell : """
-        Rscript ../00-pipeline/multiple_alignments.R {input.fasta} {input.cluster} {input.bed} {params.gRNA_seq} {params.gRNA_name}  {params.PAM}  {params.offset} {params.max_edits} {params.bulges} {params.pam_side} {output}
+        Rscript {workflow.basedir}/multiple_alignments.R {input.fasta} {input.cluster} {input.bed} {params.gRNA_seq} {params.gRNA_name}  {params.PAM}  {params.offset} {params.max_edits} {params.bulges} {params.pam_side} {output}
         """        
         
 
 rule annotate_sites:
-    input: rdata=rules.report_data.output, annot=["../02-ressources/{genome}.rds".format(genome=genome) for genome in genomes_unique]
+    input: rdata=rules.report_data.output, annot=[workflow.basedir+"/../02-ressources/{genome}.rds".format(genome=genome) for genome in genomes_unique]
     output: "results/{sample}_summary.xlsx"
     conda: "GENETHOFF"
     threads: 4
     params: species=lambda wildcards: samples["Genome"][wildcards.sample], oncoList=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["oncogene_list"]
     shell: """
-        Rscript ../00-pipeline/annotate_cuting_sites.R {params.species} {input.rdata} {output} {params.oncoList}
+        Rscript {workflow.basedir}/annotate_cuting_sites.R {input.annot} {input.rdata} {output} {params.oncoList}
         """
 
 
@@ -894,7 +894,7 @@ rule report:
      max_clusters=config["max_clusters"]
     shell: """
         mkdir -p results/report-files/;
-        Rscript ../00-pipeline/generate_tables.r "{input.summaries}" {params.sampleInfo} {params.config} "{input.predictions}" {params.max_clusters} {params.minUMI_alignments_figure} {params.min_predicted_distance}
+        Rscript {workflow.basedir}/generate_tables.r "{input.summaries}" {params.sampleInfo} {params.config} "{input.predictions}" {params.max_clusters} {params.minUMI_alignments_figure} {params.min_predicted_distance}
         """
       
 rule make_report:
@@ -904,17 +904,17 @@ rule make_report:
     params: config_path=config_file_path
     threads: 1
     shell: """
-        Rscript ../00-pipeline/publish_report.r {input} {params.config_path} {output.report_html}
-        Rscript ../00-pipeline/publish_report_pdf.r {input} {params.config_path} {output.report_pdf}
+        Rscript {workflow.basedir}/publish_report.r {input} {params.config_path} {output.report_html} {workflow.basedir}
+        Rscript {workflow.basedir}/publish_report_pdf.r {input} {params.config_path} {output.report_pdf} {workflow.basedir}
     """
 
 onsuccess:
     print("Workflow finished, no error")
-    shell("conda run -n GENETHOFF bash ../02-ressources/success.sh")
+    shell("conda run -n GENETHOFF bash {workflow.basedir}/../02-ressources/success.sh")
     if config["clean_intermediates_files"].lower() == "true":
       shell("rm -r 0*/")
 
 onerror:
     print("An error occurred")
-    shell("conda run -n GENETHOFF bash ../02-ressources/error.sh")
+    shell("conda run -n GENETHOFF bash {workflow.basedir}/../02-ressources/error.sh")
 
