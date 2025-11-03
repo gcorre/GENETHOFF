@@ -23,6 +23,11 @@ file <- args[2]
   gtf <- rtracklayer::import(file)
   gtf <- gtf[gtf$type %in% c("gene","exon")]
   
+  # replace rename gene_type gene_biotype if necessary
+  if ("gene_type" %in% colnames(GenomicRanges::mcols(gtf))) {
+    gtf$gene_biotype <- gtf$gene_type
+  }
+  
   # select only columns of interest
   mcols(gtf) <- gtf %>%
     data.frame %>% 

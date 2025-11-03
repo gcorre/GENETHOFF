@@ -52,6 +52,7 @@ UMI_hamming_distance: 1         # min distance to cluster UMI using network-base
 UMI_deduplication: "Adjacency"  # method to correct UMI (cluster or Adjacency)
 UMI_pattern: "NNWNNWNN"  
 UMI_filter: "TRUE"              # If TRUE, remove UMIs that do no match the expected pattern [FALSE or TRUE]
+UMI_side: "5"
 ################################################
 
 

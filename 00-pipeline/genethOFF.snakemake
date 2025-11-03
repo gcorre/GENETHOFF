@@ -468,14 +468,20 @@ rule add_UMI:
   threads:6
   log: R1="logs/{sample}_R1.UMI.log", R2="logs/{sample}_R2.UMI.log"    
   conda: "GENETHOFF"
-  params: UMI=config["UMI_pattern"] ## bp in 3' of index to considere as UMI
+  params:
+    UMI=config["UMI_pattern"], ## UMI pattern
+    UMI_side=config["UMI_side"] ## either 5 (left) or 3 (right)
   shell: """
         UMI_length=$(expr length {params.UMI})
         
-        cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
-        cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
+        if [ "{params.UMI_side}" = "5" ]; then
+          cutadapt -j {threads} -u $UMI_length --rename='{{id}}_{{r1.cut_prefix}} {{comment}}' -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
+          cutadapt -j {threads} -u $UMI_length --rename='{{id}}_{{r1.cut_prefix}} {{comment}}' -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
+        else
+          cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
+          cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
+        fi 
         """
-
 
 
 # remove ODN and discard reads without ODN
