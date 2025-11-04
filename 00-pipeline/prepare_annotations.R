@@ -25,11 +25,13 @@ output <- args[3]
   gtf <- gtf[gtf$type %in% c("gene","exon")]
   
   # replace rename gene_type gene_biotype if necessary
-  if ("gene_type" %in% colnames(GenomicRanges::mcols(gtf))) {
-    gtf$gene_biotype <- gtf$gene_type
-  } else {
-    cat("Error: Missing column. Please make sure your GTF file includes a 'gene_biotype' or 'gene_type' column \n", file = stderr())
-    sys.exit(1)
+  if(!"gene_biotype"  %in% colnames(GenomicRanges::mcols(gtf))){
+    if ("gene_type" %in% colnames(GenomicRanges::mcols(gtf))) {
+      gtf$gene_biotype <- gtf$gene_type
+    } else {
+      cat("Error: Missing column. Please make sure your GTF file includes a 'gene_biotype' or 'gene_type' column \n", file = stderr())
+      sys.exit(1)
+    }
   }
   
   # select only columns of interest
