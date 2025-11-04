@@ -1,0 +1,42 @@
+This is cutadapt 5.0 with Python 3.12.12
+Command line parameters: -g ^file:demultiplexing_barcodes_i1.fa -j 6 -e 0 --discard-untrimmed --action trim --no-indels -o 00-demultiplexing/{name}_i1_I1.fastq.gz -p 00-demultiplexing/{name}_i1_R1.fastq.gz Undetermined_S0_L001_I1_001.fastq.gz Undetermined_S0_L001_R1_001.fastq.gz
+Building index of 2 adapters ...
+Built an index containing 2 strings.
+Processing paired-end reads on 6 cores ...
+
+=== Summary ===
+
+Total read pairs processed:          3,472,422
+  Read 1 with adapter:               3,472,422 (100.0%)
+
+== Read fate breakdown ==
+Pairs discarded as untrimmed:                0 (0.0%)
+Pairs written (passing filters):     3,472,422 (100.0%)
+
+Total basepairs processed:   552,115,098 bp
+  Read 1:    27,779,376 bp
+  Read 2:   524,335,722 bp
+Total written (filtered):    524,335,722 bp (95.0%)
+  Read 1:             0 bp
+  Read 2:   524,335,722 bp
+
+=== First read: Adapter VEGFA_s1_K562_pos-1 ===
+
+Sequence: AGGCAGAA; Type: anchored 5'; Length: 8; Trimmed: 1175378 times
+
+No. of allowed errors: 0
+
+Overview of removed sequences
+length	count	expect	max.err	error counts
+8	1175378	53.0	0	1175378
+
+
+=== First read: Adapter VEGFA_s1_K562_neg-1 ===
+
+Sequence: TCCTGAGC; Type: anchored 5'; Length: 8; Trimmed: 2297044 times
+
+No. of allowed errors: 0
+
+Overview of removed sequences
+length	count	expect	max.err	error counts
+8	2297044	53.0	0	2297044

@@ -1,4 +1,4 @@
-This is cutadapt 5.0 with Python 3.12.11
+This is cutadapt 5.0 with Python 3.12.12
 Command line parameters: -j 6 -A AGATCGGAAGAGCGTCGTGT;min_overlap=6;max_error_rate=0.1 -A AGATCGGAAGAGCGTCGTGT;min_overlap=6;max_error_rate=0.1 -a GTTTAATTGAGTTGTCATATGT;min_overlap=6;max_error_rate=0.1 -a ATACCGTTATTAACATATGACAACTCAA;min_overlap=6;max_error_rate=0.1 -o 01-trimming/VEGFA_s1_K562_pos_R1.ODN.UMI.trimmed.fastq.gz -p 01-trimming/VEGFA_s1_K562_pos_R2.ODN.UMI.trimmed.fastq.gz 01-trimming/VEGFA_s1_K562_pos_R1.ODN.UMI.fastq.gz 01-trimming/VEGFA_s1_K562_pos_R2.ODN.UMI.fastq.gz
 Processing paired-end reads on 6 cores ...
 

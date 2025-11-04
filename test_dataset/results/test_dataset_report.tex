@@ -122,7 +122,7 @@
 
 \title{Off-targets analysis report}
 \author{Corre Guillaume}
-\date{2025-10-02}
+\date{2025-11-04}
 
 \begin{document}
 \maketitle
@@ -134,11 +134,13 @@
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
 Working directory :
-\textbf{/media/Data/common/guideseq\_gnt\_dev2/test\_dataset}
+\textbf{/media/DATA/projects/GENETHOFF/test\_dataset}
 
 Pipeline version: \textbf{V1.0}
 
 The analysis was performed \textbf{with} bulge tolerance.
+
+The quantification is based on \textbf{UMI counts} .
 
 All parameters can be found in
 \hyperref[configuration-settings]{Configuration settings} at the end of
@@ -161,7 +163,7 @@ library & Cells & Genome & gRNA & gRNA sequence & PAM & Cas & type & orientation
 VEGFA\_s1\_K562\_neg &  &  &  &  &  &  &  & negative\\
 \cline{1-1}
 \cline{9-9}
-VEGFA\_s1\_K562\_pos & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash K562} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash GRCh38} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash VEGFA\_s1} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash GGGTGGGGGGAGTTTGCTCC} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash NGG} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash Cas} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash guideseq} & positive\\
+VEGFA\_s1\_K562\_pos & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash K562} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash GRCh38p14} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash VEGFA\_s1} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash GGGTGGGGGGAGTTTGCTCC} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash NGG} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash Cas} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash guideseq} & positive\\
 \hline
 \end{tabular}}
 \end{table}
@@ -177,7 +179,7 @@ processing}\label{statistics-of-reads-processing}
 \fontsize{8}{10}\selectfont
 \begin{tabular}[t]{l|l|l|l}
 \hline
-library & Demultiplexed & ODN presence & Trimmed \& filtered\\
+library & Demultiplexed & ODN\_match & Filtered\\
 \hline
 VEGFA\_s1\_K562\_neg & 2,297,044 (100\%) & 2,116,070 (92.12\%) & 1,894,227 (82.46\%)\\
 \hline
@@ -224,15 +226,15 @@ library & Reads & UMIs & Insertions & Clusters & With gRNA match .. &  And .. & 
 \hline
  &  &  &  &  &  & .. 2 PCR orientations & 0\\
 \cline{7-8}
- &  &  &  &  &  & .. 2 ODN orientations & 4\\
+ &  &  &  &  &  & .. 2 ODN orientations & 8\\
 \cline{7-8}
-\multirow{-3}{*}{\raggedleft\arraybackslash VEGFA\_s1\_K562\_neg} & \multirow{-3}{*}{\raggedleft\arraybackslash 120,713} & \multirow{-3}{*}{\raggedleft\arraybackslash 4,792} & \multirow{-3}{*}{\raggedleft\arraybackslash 700} & \multirow{-3}{*}{\raggedleft\arraybackslash 686} & \multirow{-3}{*}{\centering\arraybackslash 21} & .. In Oncogene & 0\\
+\multirow{-3}{*}{\raggedleft\arraybackslash VEGFA\_s1\_K562\_neg} & \multirow{-3}{*}{\raggedleft\arraybackslash 588,312} & \multirow{-3}{*}{\raggedleft\arraybackslash 26,074} & \multirow{-3}{*}{\raggedleft\arraybackslash 7,400} & \multirow{-3}{*}{\raggedleft\arraybackslash 7,322} & \multirow{-3}{*}{\centering\arraybackslash 132} & .. In Oncogene & 0\\
 \cline{1-8}
  &  &  &  &  &  & .. 2 PCR orientations & 0\\
 \cline{7-8}
  &  &  &  &  &  & .. 2 ODN orientations & 3\\
 \cline{7-8}
-\multirow{-3}{*}{\raggedleft\arraybackslash VEGFA\_s1\_K562\_pos} & \multirow{-3}{*}{\raggedleft\arraybackslash 76,851} & \multirow{-3}{*}{\raggedleft\arraybackslash 3,232} & \multirow{-3}{*}{\raggedleft\arraybackslash 496} & \multirow{-3}{*}{\raggedleft\arraybackslash 492} & \multirow{-3}{*}{\centering\arraybackslash 14} & .. In Oncogene & 0\\
+\multirow{-3}{*}{\raggedleft\arraybackslash VEGFA\_s1\_K562\_pos} & \multirow{-3}{*}{\raggedleft\arraybackslash 432,763} & \multirow{-3}{*}{\raggedleft\arraybackslash 18,879} & \multirow{-3}{*}{\raggedleft\arraybackslash 5,039} & \multirow{-3}{*}{\raggedleft\arraybackslash 5,018} & \multirow{-3}{*}{\centering\arraybackslash 119} & .. In Oncogene & 0\\
 \hline
 \end{tabular}}
 \end{table}
@@ -248,7 +250,7 @@ Cut sites were identified from the alignment start position of R2 reads.
   UMI were corrected using the \textbf{Adjacency} method with a Hamming
   distance tolerance of \textbf{1}.
 \item
-  Positions/UMI with more than \textbf{4} reads were considered for next
+  Positions/UMI with more than \textbf{3} reads were considered for next
   step.
 \end{itemize}
 
@@ -270,7 +272,7 @@ smaller than \textbf{100} bp and characterized by :
   Number of clusters overlapping an oncogene.
 \end{itemize}
 
-Clusters with more than \textbf{4} total UMIs were considered.
+Clusters with more than \textbf{2} total UMIs were considered.
 \end{quote}
 
 \section{Best match(es)}\label{best-matches}
@@ -289,9 +291,9 @@ necessarily be 0 ).
 \hline
 library & Position & Cut offset & Edits\_gRNA & Edits\_PAM & N\_UMI\_cluster & Relative\_abundance & Rank\\
 \hline
-VEGFA\_s1\_K562\_neg & chr6:43769560 & -1 & 0 & 0 & 300 & 43.99 & 1\\
+VEGFA\_s1\_K562\_neg & chr6:43769560 & -1 & 0 & 0 & 369 & 31.98 & 1\\
 \cline{1-8}
-VEGFA\_s1\_K562\_pos & chr6:43769560 & -2 & 0 & 0 & 93 & 41.15 & 1\\
+VEGFA\_s1\_K562\_pos & chr6:43769560 & -2 & 0 & 0 & 115 & 19.39 & 1\\
 \hline
 \end{tabular}}
 \end{table}
@@ -309,7 +311,7 @@ VEGFA\_s1\_K562\_pos & chr6:43769560 & -2 & 0 & 0 & 93 & 41.15 & 1\\
 \item
   ``Relative Abundance'' : Contribution of cluster abundance in \% of
   total UMIs count. Only clusters with gRNA match with less than
-  \textbf{6} edits and more \textbf{4} UMIs are considered.
+  \textbf{6} edits and more \textbf{2} UMIs are considered.
 \item
   Rank: Rank of the best candidate(s) based on UMI count.
 \end{itemize}
@@ -323,7 +325,7 @@ shallow curve suggests more even distribution among different clusters.
 
 \begin{figure}[H]
 
-{\centering \includegraphics[width=0.9\linewidth]{/media/Data/common/guideseq_gnt_dev2/test_dataset/results/test_dataset_report_files/figure-latex/unnamed-chunk-6-1} 
+{\centering \includegraphics[width=0.9\linewidth]{/media/DATA/projects/GENETHOFF/test_dataset/results/test_dataset_report_files/figure-latex/unnamed-chunk-6-1} 
 
 }
 
@@ -352,7 +354,7 @@ forward or reverse ODN orientation (blue and red bars respectively).
 
 \begin{figure}[H]
 
-{\centering \includegraphics[width=0.9\linewidth]{/media/Data/common/guideseq_gnt_dev2/test_dataset/results/test_dataset_report_files/figure-latex/unnamed-chunk-7-1} 
+{\centering \includegraphics[width=0.9\linewidth]{/media/DATA/projects/GENETHOFF/test_dataset/results/test_dataset_report_files/figure-latex/unnamed-chunk-7-1} 
 
 }
 
@@ -369,7 +371,7 @@ smaller or equal to \textbf{6} are considered.
 
 \begin{figure}[H]
 
-{\centering \includegraphics[width=0.9\linewidth]{/media/Data/common/guideseq_gnt_dev2/test_dataset/results/test_dataset_report_files/figure-latex/unnamed-chunk-8-1} 
+{\centering \includegraphics[width=0.9\linewidth]{/media/DATA/projects/GENETHOFF/test_dataset/results/test_dataset_report_files/figure-latex/unnamed-chunk-8-1} 
 
 }
 
@@ -383,7 +385,7 @@ equal to \textbf{6} are considered.
 
 \begin{figure}[H]
 
-{\centering \includegraphics[width=0.9\linewidth]{/media/Data/common/guideseq_gnt_dev2/test_dataset/results/test_dataset_report_files/figure-latex/unnamed-chunk-9-1} 
+{\centering \includegraphics[width=0.9\linewidth]{/media/DATA/projects/GENETHOFF/test_dataset/results/test_dataset_report_files/figure-latex/unnamed-chunk-9-1} 
 
 }
 
@@ -400,12 +402,15 @@ equal to \textbf{6} are considered.
 \FunctionTok{contact}\KeywordTok{:}\AttributeTok{ }\StringTok{"gcorre@genethon.fr"}
 \FunctionTok{version}\KeywordTok{:}\AttributeTok{ }\StringTok{\textquotesingle{}V1.0\textquotesingle{}}
 
-\FunctionTok{clean\_intermediates\_files}\KeywordTok{:}\AttributeTok{ }\StringTok{\textquotesingle{}TRUE\textquotesingle{}}
+\FunctionTok{clean\_intermediates\_files}\KeywordTok{:}\AttributeTok{ }\StringTok{\textquotesingle{}FALSE\textquotesingle{}}
+\FunctionTok{skip\_demultiplexing}\KeywordTok{:}\AttributeTok{ }\StringTok{\textquotesingle{}FALSE\textquotesingle{}}
+\FunctionTok{quantification}\KeywordTok{:}\AttributeTok{ }\StringTok{"umi"}\CommentTok{ \# use "umi" or "fragment" for the quantification (only if rescue\_R2 is \textquotesingle{}no")}
+\FunctionTok{rescue\_R2}\KeywordTok{:}\AttributeTok{ }\StringTok{"FALSE"}\CommentTok{     \# Rescue R2 reads if R1 is too short or the pair doesn\textquotesingle{}t align properly.}
 
 \CommentTok{\#\# Library informations}
 \FunctionTok{sampleInfo\_path}\KeywordTok{:}\AttributeTok{ }\StringTok{"test\_datasheet.csv"}
 
-\FunctionTok{read\_path}\KeywordTok{:}\AttributeTok{  }\StringTok{"./"}
+\FunctionTok{read\_path}\KeywordTok{:}\AttributeTok{  }\StringTok{""}
 \FunctionTok{R1}\KeywordTok{:}\AttributeTok{ }\StringTok{"Undetermined\_S0\_L001\_R1\_001.fastq.gz"}
 \FunctionTok{R2}\KeywordTok{:}\AttributeTok{ }\StringTok{"Undetermined\_S0\_L001\_R2\_001.fastq.gz"}
 \FunctionTok{I1}\KeywordTok{:}\AttributeTok{ }\StringTok{"Undetermined\_S0\_L001\_I1\_001.fastq.gz"}
@@ -415,11 +420,11 @@ equal to \textbf{6} are considered.
 \CommentTok{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}
 \CommentTok{\#\# path to references}
 \FunctionTok{genome}\KeywordTok{:}
-\AttributeTok{  }\FunctionTok{GRCh38}\KeywordTok{:}
-\AttributeTok{    }\FunctionTok{fasta}\KeywordTok{:}\AttributeTok{ }\StringTok{"/media/References/Human/ensembl/GRCh38/Sequences/Homo\_sapiens.GRCh38.dna.primary\_assembly.fa"}
-\AttributeTok{    }\FunctionTok{index}\KeywordTok{:}\AttributeTok{ }\StringTok{"/media/References/Human/ensembl/GRCh38/Indexes/Bowtie2/Homo\_sapiens.GRCh38.dna.primary\_assembly"}\CommentTok{ \# path to index created during the run if not existing yet}
-\AttributeTok{    }\FunctionTok{annotation}\KeywordTok{:}\AttributeTok{ }\StringTok{"/media/References/Human/ensembl/GRCh38/Annotations/Homo\_sapiens.GRCh38.113.chr.gtf.gz"}
-\AttributeTok{    }\FunctionTok{oncogene\_list}\KeywordTok{:}\AttributeTok{ }\StringTok{"/media/References/Human/ensembl/GRCh38/Annotations/OncoList\_OncoKB\_GRCh38\_2025{-}07{-}04.tsv"}
+\AttributeTok{  }\FunctionTok{GRCh38p14}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{fasta}\KeywordTok{:}\AttributeTok{ }\StringTok{"/media/DATA/references/human/GRCh38p14/gencode/fasta/GRCh38.primary\_assembly.genome.chr.fa"}
+\AttributeTok{    }\FunctionTok{index}\KeywordTok{:}\AttributeTok{ }\StringTok{"/media/DATA/references/human/GRCh38p14/gencode/index/GRCh38.primary\_assembly.genome.chr"}\CommentTok{ \# path to index created during the run if not existing yet}
+\AttributeTok{    }\FunctionTok{annotation}\KeywordTok{:}\AttributeTok{ }\StringTok{"/media/DATA/references/human/GRCh38p14/gencode/annotations/gencode.v49.primary\_assembly.basic.annotation.gtf.gz"}
+\AttributeTok{    }\FunctionTok{oncogene\_list}\KeywordTok{:}\AttributeTok{ }\StringTok{"/media/DATA/projects/GENETHOFF/02{-}ressources/OncoList\_OncoKB\_GRCh38\_2025{-}07{-}04.tsv"}
 \AttributeTok{  }\FunctionTok{mouse}\KeywordTok{:}
 \AttributeTok{    }\FunctionTok{fasta}\KeywordTok{:}\AttributeTok{ }\StringTok{""}
 \AttributeTok{    }\FunctionTok{index}\KeywordTok{:}\AttributeTok{ }\StringTok{""}
@@ -435,7 +440,6 @@ equal to \textbf{6} are considered.
 \FunctionTok{aligner}\KeywordTok{:}\AttributeTok{ }\StringTok{"bowtie2"}\CommentTok{   \#\# Aligner to use (bowtie2 or bwa)}
 \FunctionTok{minFragLength}\KeywordTok{:}\AttributeTok{ }\DecValTok{100}\CommentTok{         \# Minimal fragment length after alignment}
 \FunctionTok{maxFragLength}\KeywordTok{:}\AttributeTok{ }\DecValTok{1500}\CommentTok{        \# Maximal fragment length after alignment }
-\FunctionTok{rescue\_R2}\KeywordTok{:}\AttributeTok{ }\StringTok{"TRUE"}\CommentTok{     \# Rescur R2 reads if R1 is too short or the pair doesn\textquotesingle{}t align properly.}
 
 \CommentTok{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}
 
@@ -446,6 +450,7 @@ equal to \textbf{6} are considered.
 \FunctionTok{UMI\_deduplication}\KeywordTok{:}\AttributeTok{ }\StringTok{"Adjacency"}\CommentTok{  \# method to correct UMI (cluster or Adjacency)}
 \FunctionTok{UMI\_pattern}\KeywordTok{:}\AttributeTok{ }\StringTok{"NNWNNWNN"}\AttributeTok{  }
 \FunctionTok{UMI\_filter}\KeywordTok{:}\AttributeTok{ }\StringTok{"TRUE"}\CommentTok{              \# If TRUE, remove UMIs that do no match the expected pattern [FALSE or TRUE]}
+\FunctionTok{UMI\_side}\KeywordTok{:}\AttributeTok{ }\StringTok{"3"}\CommentTok{                   \# position of the UMI in the I2 read sequence: 5 = UMI+BC, 3 = BC+UMI}
 \CommentTok{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}
 
 
@@ -454,8 +459,8 @@ equal to \textbf{6} are considered.
 \FunctionTok{tolerate\_bulges}\KeywordTok{:}\AttributeTok{ }\StringTok{"TRUE"}\CommentTok{           \# whether to include gaps in the gRNA alignment (this will change the gap penalty during SW pairwise alignment)}
 \FunctionTok{max\_edits\_crRNA}\KeywordTok{:}\AttributeTok{ }\DecValTok{6}\CommentTok{                \# filter clusters with less or equal than n edits in the crRNA sequence (edits = substitutions + INDELs)}
 \FunctionTok{ISbinWindow}\KeywordTok{:}\AttributeTok{ }\DecValTok{100}\CommentTok{                  \# insertion sites closer than \textquotesingle{}ISbinWindow\textquotesingle{} will be clustered together}
-\FunctionTok{minReadsPerUMI}\KeywordTok{:}\AttributeTok{ }\DecValTok{4}\CommentTok{                 \# Min number of reads per UMIs (\textgreater{}=)}
-\FunctionTok{minUMIPerIS}\KeywordTok{:}\AttributeTok{ }\DecValTok{4}\CommentTok{                      \# Min number of UMI per IS (\textgreater{}=)}
+\FunctionTok{minReadsPerUMI}\KeywordTok{:}\AttributeTok{ }\DecValTok{3}\CommentTok{                 \# Min number of reads per UMIs (\textgreater{}=)}
+\FunctionTok{minUMIPerIS}\KeywordTok{:}\AttributeTok{ }\DecValTok{2}\CommentTok{                    \# Min number of UMI per IS (\textgreater{}=)}
 \FunctionTok{slopSize}\KeywordTok{:}\AttributeTok{ }\DecValTok{50}\CommentTok{                      \# window size (bp) around IS (both directions) to identify gRNA sequence (ie 50bp = {-}50bp to +50bp)}
 \FunctionTok{min\_predicted\_distance}\KeywordTok{:}\AttributeTok{ }\DecValTok{100}\CommentTok{       \# distance between cut site and predicted cut site to consider as predicted}
 \CommentTok{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}
@@ -532,11 +537,11 @@ equal to \textbf{6} are considered.
 \section{R session informations}\label{r-session-informations}
 
 R version 4.4.3 (2025-02-28) Platform: x86\_64-conda-linux-gnu Running
-under: Debian GNU/Linux 12 (bookworm)
+under: Debian GNU/Linux 11 (bullseye)
 
 Matrix products: default BLAS/LAPACK:
-/opt/miniconda/envs/guideseq/lib/libopenblasp-r0.3.30.so; LAPACK version
-3.12.0
+/home/gcorre/miniconda3/envs/GENETHOFF/lib/libopenblasp-r0.3.30.so;
+LAPACK version 3.12.0
 
 locale: {[}1{]} LC\_CTYPE=fr\_FR.UTF-8 LC\_NUMERIC=C\\
 {[}3{]} LC\_TIME=fr\_FR.UTF-8 LC\_COLLATE=fr\_FR.UTF-8\\
@@ -557,9 +562,9 @@ dplyr\_1.1.4 purrr\_1.1.0\\
 {[}13{]} tidyverse\_2.0.0 rmdformats\_1.0.4
 
 loaded via a namespace (and not attached): {[}1{]} generics\_0.1.4
-xml2\_1.4.0 stringi\_1.8.7 hms\_1.1.3\\
+xml2\_1.4.0 stringi\_1.8.7 hms\_1.1.4\\
 {[}5{]} digest\_0.6.37 magrittr\_2.0.4 evaluate\_1.0.5 grid\_4.4.3\\
-{[}9{]} timechange\_0.3.0 RColorBrewer\_1.1-3 bookdown\_0.44
+{[}9{]} timechange\_0.3.0 RColorBrewer\_1.1-3 bookdown\_0.45
 fastmap\_1.2.0\\
 {[}13{]} plyr\_1.8.9 ggrepel\_0.9.6 gridExtra\_2.3 viridisLite\_0.4.2
 {[}17{]} scales\_1.4.0 textshaping\_1.0.3 cli\_3.6.5 rlang\_1.1.6\\

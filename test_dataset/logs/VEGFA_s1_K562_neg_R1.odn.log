@@ -1,5 +1,5 @@
-This is cutadapt 5.0 with Python 3.12.11
-Command line parameters: -j 6 -G negative=TTGAGTTGTCATATGTTAATAACGGTAT;max_error_rate=0;rightmost -G positive=ACATATGACAACTCAATTAAAC;max_error_rate=0;rightmost --discard-untrimmed --rename={id}_{r2.adapter_name} {comment} -o 01-trimming/VEGFA_s1_K562_neg_R1.ODN.fastq.gz -p 01-trimming/VEGFA_s1_K562_neg_R2.ODN.fastq.gz 00-demultiplexing/VEGFA_s1_K562_neg_R1.fastq.gz 00-demultiplexing/VEGFA_s1_K562_neg_R2.fastq.gz
+This is cutadapt 5.0 with Python 3.12.12
+Command line parameters: -j 6 -G negative=TTGAGTTGTCATATGTTAATAACGGTAT;max_error_rate=0;rightmost -G positive=ACATATGACAACTCAATTAAAC;max_error_rate=0;rightmost --discard-untrimmed --rename={id}_{r2.adapter_name} {comment} -o 01-trimming/VEGFA_s1_K562_neg_R1.ODN.UMI.fastq.gz -p 01-trimming/VEGFA_s1_K562_neg_R2.ODN.UMI.fastq.gz 01-trimming/VEGFA_s1_K562_neg_R1.UMI.fastq.gz 01-trimming/VEGFA_s1_K562_neg_R2.UMI.fastq.gz
 Processing paired-end reads on 6 cores ...
 
 === Summary ===

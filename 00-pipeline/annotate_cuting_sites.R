@@ -123,7 +123,7 @@ if(exists("clusters_grna_match") && nrow(clusters_grna_match)>0){
     group_by(clusterID) %>% 
     summarise(gene_ensemblID = toString(annot.gene_id),
               Symbol = toString(annot.gene_name),
-              gene_type = toString(annot.gene_biotype),
+              gene_biotype = toString(annot.gene_biotype),
               position = toString(position),
               Onco_annotation = toString(Onco_annotation))
   
