@@ -30,7 +30,7 @@ output <- args[3]
       gtf$gene_biotype <- gtf$gene_type
     } else {
       cat("Error: Missing column. Please make sure your GTF file includes a 'gene_biotype' or 'gene_type' column \n", file = stderr())
-      sys.exit(1)
+      quit(status=1)
     }
   }
   

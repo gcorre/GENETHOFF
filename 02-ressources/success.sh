@@ -1,0 +1,1 @@
+echo 'You rock baby !' | cowpy -e greedy
