@@ -36,9 +36,26 @@ if not os.path.isfile("configuration.yml"):
 else:
   print(GREEN + u'\u2705' + RESET + " Configuration file found\n")
   configfile: "configuration.yml"
-  config_file_path=os.getcwd()+'/'+workflow.configfiles[0]
+  config_file_path=os.getcwd()+'/'+ workflow.configfiles[0]
+  validate(config,"config.schema.yaml")
 
+###############################################################
+# check that options are compatible
+###############################################################
 
+if config["rescue_R2"].lower() == "true":
+  print(GREEN + u'\u2705' + RESET + " Will try to align reads as single ends if paired-ends fails\n")
+  if config["quantification"].lower()=="umi":
+    print(GREEN + u'\u2705' + RESET + " Will perform Quantification using UMIs \n")
+  else:
+    print(RED + u'\u274C'  + " Cannot perform Fragment quantification on single ends reads alignment. Please change the quantification to 'umi' or set rescue_R2 to 'FALSE'... abording \n"+ RESET)
+    sys.exit(1)
+else:
+  print(GREEN + u'\u2705' + RESET + " Will only work with paired-ends reads, will not rescue single-ends\n")
+  if config["quantification"].lower()=="fragment":
+    print(GREEN + u'\u2705' + RESET + " Will perform Quantification using fragments length\n")
+  else:
+    print(GREEN + u'\u2705' + RESET +" Will perform Quantification using UMIs \n")
 
 ###############################################################
 ## Load the sample datasheet as a TSV file or excel
@@ -68,7 +85,7 @@ else:
 
 lib_names = samplesTable["sampleName"].tolist()
 
-if config["skip_demultiplexing"] == "TRUE" and len(lib_names)!=len(set(lib_names)):
+if config["skip_demultiplexing"].lower() == "true" and len(lib_names)!=len(set(lib_names)):
   print(RED + u'\u274C' + RESET + " All samples name must be unique if demultiplexing is skipped.\n")
   print(samplesTable["sampleName"].to_markdown(index=False),"\n")
   sys.exit(1)
@@ -77,7 +94,7 @@ if config["skip_demultiplexing"] == "TRUE" and len(lib_names)!=len(set(lib_names
 ## if skipping demultiplexing , check that libraries folders specified in sample datasheet exist
 ###############################################################
 
-if config["skip_demultiplexing"] == "TRUE":
+if config["skip_demultiplexing"].lower() == "true":
   paths = samplesTable["path_to_files"].drop_duplicates().tolist()
   for path in paths:
     if not os.path.isdir(path):
@@ -110,8 +127,8 @@ if identical_values.all():
     ## check there is no "-" in sample name
     strings_with_hyphen = [item for item in samples_unique if "-" in item]
     if strings_with_hyphen:
-      print(f"{RED} !! '-' detected in the following sample name :", strings_with_hyphen,"\n Please modify sample name and replace '-' by another delimiter")
-      sys.exit(1)
+        print(f"{RED} !! '-' detected in the following sample name :", strings_with_hyphen,"\n Please modify sample name and replace '-' by another delimiter")
+        sys.exit(1)
     else:
       
       genomes=my_list["Genome"].tolist()
@@ -169,7 +186,7 @@ else:
     # for undemultiplexed libraries, the files name is define in the CONFIGURATION FILE
     ###############################################################
 
-if config["skip_demultiplexing"] == "FALSE":
+if config["skip_demultiplexing"].lower() == "false":
   files_to_check = ["R1", "R2", "I1", "I2"]
   
   results = {}
@@ -182,7 +199,7 @@ if config["skip_demultiplexing"] == "FALSE":
           results[file_key] = RED + u'\u274C' + RESET +" "  +file_path 
           
   # Print the results in a table format with colors
-  print("## Skip_demultiplexing : FALSE \n")
+  print("## Skip_demultiplexing : No \n")
   print("### Checking if input files are present :\n")
 
   print(f"      -{results['R1']}")
@@ -207,7 +224,7 @@ if config["skip_demultiplexing"] == "FALSE":
     ## a symlink from each file is created into 00-demultiplexing so the pipeline  will start after the demultiplexing step
     ########################################################
 else:
-  print("\n\n ## Skip_demultiplexing : TRUE \n ### Checking if input files are present for each sample :\n")
+  print("\n\n ## Skip_demultiplexing : YES \n ### Checking if input files are present for each sample :\n")
   
   demultiplexing_dir = "00-demultiplexing"
 
@@ -340,11 +357,31 @@ rule make_indexes_fasta_i1:
 
 rule demux_I1:
     input: 
-      R1=os.path.join(config["read_path"], config["R1"]), 
-      R2=os.path.join(config["read_path"], config["R2"]), 
-      I1=os.path.join(config["read_path"], config["I1"]), 
-      I2=os.path.join(config["read_path"], config["I2"]), 
-      barcodes=rules.make_indexes_fasta_i1.output
+      R1=branch(lambda wildcards: (
+          str(lookup(dpath="skip_demultiplexing", within=config)).lower() == "false") ,
+          then=os.path.join(config["read_path"], config["R1"]), 
+          otherwise=""
+        ),
+      R2=branch(lambda wildcards: (
+          str(lookup(dpath="skip_demultiplexing", within=config)).lower() == "false") ,
+          then=os.path.join(config["read_path"], config["R2"]), 
+          otherwise=""
+        ),
+      I1=branch(lambda wildcards: (
+            str(lookup(dpath="skip_demultiplexing", within=config)).lower() == "false") ,
+            then=os.path.join(config["read_path"], config["I1"]), 
+            otherwise=""
+        ),
+      I2=branch(lambda wildcards: (
+            str(lookup(dpath="skip_demultiplexing", within=config)).lower() == "false") ,
+            then=os.path.join(config["read_path"], config["I2"]), 
+            otherwise=""
+        ),
+      barcodes=branch(lambda wildcards: (
+            str(lookup(dpath="skip_demultiplexing", within=config)).lower() == "false") ,
+            then=rules.make_indexes_fasta_i1.output, 
+            otherwise=""
+        )
     output: 
       R1=temp(["00-demultiplexing/{sample}-1_i1_R1.fastq.gz".format(sample=sample) for sample in samples["sampleName"]]),
       R2=temp(["00-demultiplexing/{sample}-1_i1_R2.fastq.gz".format(sample=sample) for sample in samples["sampleName"]]),
@@ -354,14 +391,11 @@ rule demux_I1:
     log: R1= "logs/demultiplexing_i1_R1.log"
     threads: 6
     shell: """
+        #I2_length=$(seqkit head -n 100 {input.I1} | seqkit stat | awk 'NR == 2 {{print $7}}')
         
         cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action trim --no-indels -o 00-demultiplexing/{{name}}_i1_I1.fastq.gz -p 00-demultiplexing/{{name}}_i1_R1.fastq.gz {input.I1} {input.R1} > {log.R1}
-        
         cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action trim --no-indels -o 00-demultiplexing/{{name}}_i1_I1.fastq.gz -p 00-demultiplexing/{{name}}_i1_R2.fastq.gz {input.I1} {input.R2} > /dev/null
-        
         cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_i1_I1.fastq.gz -p 00-demultiplexing/{{name}}_i1_I2.fastq.gz {input.I1} {input.I2} > /dev/null
-
-       # rm 00-demultiplexing/*unknown* 
         """
   
 
@@ -465,23 +499,22 @@ rule add_UMI:
     R2="00-demultiplexing/{sample}_R2.fastq.gz"
   output: 
     R1=temp("01-trimming/{sample}_R1.UMI.fastq.gz"),
-    R2=temp("01-trimming/{sample}_R2.UMI.fastq.gz"),
-    I2=temp("01-trimming/{sample}_I2.UMI.fastq.gz")
+    R2=temp("01-trimming/{sample}_R2.UMI.fastq.gz")
   threads:6
   log: R1="logs/{sample}_R1.UMI.log", R2="logs/{sample}_R2.UMI.log"    
   conda: "GENETHOFF"
   params:
     UMI=config["UMI_pattern"], ## UMI pattern
-    UMI_side=config["UMI_side"] ## either 5 (left) or 3 (right)
+    UMI_side=str(config["UMI_side"]) ## either 5 (left) or 3 (right)
   shell: """
         UMI_length=$(expr length {params.UMI})
         
-        if [ "{params.UMI_side}" = "5" ]; then
-          cutadapt -j {threads} -u $UMI_length --rename='{{id}}_{{r1.cut_prefix}} {{comment}}' -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
-          cutadapt -j {threads} -u $UMI_length --rename='{{id}}_{{r1.cut_prefix}} {{comment}}' -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
+        if [ {params.UMI_side} = "5" ]; then
+          cutadapt -j {threads} -u $UMI_length --rename='{{id}}_{{r1.cut_prefix}} {{comment}}' -o /dev/null -p {output.R1} {input.I2} {input.R1} > {log.R1}
+          cutadapt -j {threads} -u $UMI_length --rename='{{id}}_{{r1.cut_prefix}} {{comment}}' -o /dev/null -p {output.R2} {input.I2} {input.R2} > {log.R2}
         else
-          cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
-          cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
+          cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o /dev/null -p {output.R1} {input.I2} {input.R1} > {log.R1}
+          cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o /dev/null -p {output.R2} {input.I2} {input.R2} > {log.R2}
         fi 
         """
 
@@ -489,8 +522,16 @@ rule add_UMI:
 # remove ODN and discard reads without ODN
 rule trim_ODN:
   input: 
-    R1=rules.add_UMI.output.R1,
-    R2=rules.add_UMI.output.R2
+    R1=branch(lambda wildcards: (
+            str(lookup(dpath="quantification", within=config)).lower() == "umi" ) ,
+            then=rules.add_UMI.output.R1,
+            otherwise="00-demultiplexing/{sample}_R1.fastq.gz"
+        ),
+    R2=branch(lambda wildcards: (
+            str(lookup(dpath="quantification", within=config)).lower() == "umi" ) ,
+            then=rules.add_UMI.output.R2,
+            otherwise="00-demultiplexing/{sample}_R2.fastq.gz"
+        )
   output: 
     R1=temp("01-trimming/{sample}_R1.ODN.UMI.fastq.gz"),
     R2=temp("01-trimming/{sample}_R2.ODN.UMI.fastq.gz")
@@ -502,8 +543,6 @@ rule trim_ODN:
     ODN_neg=lambda wildcards: config[samples["type"][wildcards.sample]]["negative"]["R2_leading"]
   shell: """
         cutadapt -j {threads} -G "negative={params.ODN_neg};max_error_rate=0;rightmost" -G "positive={params.ODN_pos};max_error_rate=0;rightmost" --discard-untrimmed  --rename='{{id}}_{{r2.adapter_name}} {{comment}}' -o {output.R1} -p {output.R2} {input.R1} {input.R2} > {log.R1}
-        
-
           """
 
 
@@ -633,17 +672,27 @@ rule sort_aligned:
       list = rules.filter_alignments.output.list
     output:  
       bam="03-align/{sample}.UMI.ODN.trimmed.filtered.sorted.filtered.bam",
-      bamPos=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sorted.bam"),
-      bamName=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sortedName.filtered.bam")
+      bamPos=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sorted.bam")
     threads: 6
     conda: "GENETHOFF"
-    message: "Sort reads by name"
+    message: "Sort reads"
     shell: """
         samtools sort -@ {threads} {input.sam}  > {output.bamPos}
 
         samtools view -hb --qname-file {input.list}  {output.bamPos} > {output.bam}
         samtools index {output.bam}
-        samtools sort -n -@ {threads} {output.bam} > {output.bamName}
+    """
+
+rule sort_aligned_name:
+    input: 
+      bam=rules.sort_aligned.output.bam
+    output: 
+      bamName=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sortedName.filtered.bam")
+    threads: 6
+    conda: "GENETHOFF"
+    message: "Sort reads by name"
+    shell: """
+        samtools sort -n -@ {threads} {input.bam} > {output.bamName}
     """
 
 
@@ -654,27 +703,30 @@ rule sort_aligned:
 # add a cluster ID to group close IS (distance defined in the config file) 
 rule call_IS:
     input: 
-      rules.sort_aligned.output.bamName
+      rules.sort_aligned_name.output.bamName
     output: 
       tmp=temp("04-IScalling/{sample}.pebed"), 
       umi="04-IScalling/{sample}.reads_per_UMI_per_IS.bed"
     threads: 1
     conda: "GENETHOFF"
-    params: UMI=config["UMI_pattern"]
+    params: UMI=config["UMI_pattern"], quantif=config["quantification"].lower()
     shell: """
-    
-        UMI_length=$(expr length {params.UMI})
-
         bedtools bamtobed -bedpe -mate1 -i {input} > {output.tmp}
+        if [ {params.quantif} = "umi" ] ; 
+        then 
+            UMI_length=$(expr length {params.UMI})
+            # read R2 contains the genome/ODN junction (use $10 of PE bed = mate 2)
         
-        # read R2 contains the genome/ODN junction (use $10 of PE bed = mate 2)
-        
-        ##################################################################
-        # count number of reads per UMI and per IS (pos and strand separated)
-        ##################################################################
-
-        awk 'BEGIN{{OFS="\\t";FS="\\t"}} ($1 == $4) {{split($7,a,"_"); if($10=="+") print $4,$5,$5,a[1],a[2],a[3],$8,$10,$3-$5; else print $4,$6-1,$6-1,a[1],a[2],a[3],$8,$10,$6-$2}}' {output.tmp} | sort -k1,1 -k2,3n -k6,6 -k5,5 -k8,8 | bedtools groupby -g 1,2,3,6,5,8 -c 4,7 -o count_distinct,median  > {output.umi}
-        
+            ##################################################################
+            # count number of reads per UMI and per IS (pos and strand separated)
+            ##################################################################
+            awk 'BEGIN{{OFS="\\t";FS="\\t"}} ($1 == $4) {{split($7,a,"_"); if($10=="+") print $4,$5,$5,a[1],a[2],a[3],$8,$10,$3-$5; else print $4,$6-1,$6-1,a[1],a[2],a[3],$8,$10,$6-$2}}' {output.tmp} | sort -k1,1 -k2,3n -k6,6 -k5,5 -k8,8 | bedtools groupby -g 1,2,3,6,5,8 -c 4,7 -o count_distinct,median  > {output.umi}
+        else 
+            ##################################################################
+            # count number of reads per fragment length and per IS (pos and strand separated)
+            ##################################################################
+            awk 'BEGIN{{OFS="\\t";FS="\\t"}} ($1 == $4) {{split($7,a,"_"); if($10=="+") print $4,$5,$5,a[1],$3-$5,a[2],$8,$10,$3-$5; else print $4,$6-1,$6-1,a[1],$6-$2,a[2],$8,$10,$6-$2}}' {output.tmp} | sort -k1,1 -k2,3n -k6,6 -k5,5n -k8,8 | bedtools groupby -g 1,2,3,6,5,8 -c 4,7 -o count_distinct,median | awk 'BEGIN{{OFS="\\t";FS="\\t"}} {{print $1,$2,$3,$5,$4,$6,$7,$8}}'  > {output.umi}
+        fi
         """
 
 
@@ -735,12 +787,12 @@ rule callIS_R2rescued:
 rule correct_UMI:
     input: 
       bed=rules.call_IS.output.umi, 
-      bed_rescued=rules.callIS_R2rescued.output.umi
-    output: 
+      bed_rescued=lambda wildcards: f"04-IScalling/{wildcards.sample}_rescueR2.bed" if config["rescue_R2"].lower()=="true" and config["quantification"].lower()=="umi" else rules.call_IS.output.umi 
+    output:  
       "04-IScalling/{sample}.reads_per_UMI_per_IS_corrected.bed"
     conda: "GENETHOFF"
     threads: 2
-    params: hamming=config["UMI_hamming_distance"], filter = config["UMI_filter"],  UMI=config["UMI_pattern"], method = config["UMI_deduplication"], rescueR2=config["rescue_R2"]
+    params: hamming=config["UMI_hamming_distance"], filter = config["UMI_filter"].upper(),  UMI=config["UMI_pattern"], method = config["UMI_deduplication"], rescueR2=config["rescue_R2"].upper()
     shell: """
         Rscript {workflow.basedir}/correct_umi.R {input.bed} {params.UMI} {params.filter} {params.hamming} {params.method} {output} {params.rescueR2}
         """
@@ -748,7 +800,7 @@ rule correct_UMI:
 
 rule Collapse_UMI_IS:
     input: 
-      rules.correct_UMI.output
+      lambda wildcards: f"04-IScalling/{wildcards.sample}.reads_per_UMI_per_IS.bed" if config["rescue_R2"].lower()=="false" and config["quantification"].lower()=="fragment" else rules.correct_UMI.output
     output: 
       collapse="04-IScalling/{sample}.UMIs_per_IS_in_Cluster.bed"
     threads: 1
@@ -760,7 +812,7 @@ rule Collapse_UMI_IS:
         # aggregate UMI per IS
         ##################################################################
         
-        awk 'NR>1 && $7>{params.minReadsPerUMI}' {input} | sort -k1,1 -k2,2n -k3,3n -k5,5 -k 6,6 | bedtools groupby -g 1,2,3,5,6 -c 4,7,4,7,8  -o count_distinct,sum,collapse,collapse,median  | awk 'BEGIN{{OFS="\\t";FS="\\t"}} $6>{params.minUMIPerIS} {{print $1,$2,$3,"ID_"NR,$10,$5,$4,$6,$7,$8,$9}}' |   sort -k1,1 -k2,2n -k3,3n -k5,5 | bedtools cluster -d {params.window} > {output.collapse}
+        awk '$0 !~ "start" && $7>={params.minReadsPerUMI}' {input} | sort -k1,1 -k2,2n -k3,3n -k5,5 -k 6,6 | bedtools groupby -g 1,2,3,5,6 -c 4,7,4,7,8  -o count_distinct,sum,collapse,collapse,median  | awk 'BEGIN{{OFS="\\t";FS="\\t"}} $6>={params.minUMIPerIS} {{print $1,$2,$3,"ID_"NR,$10,$5,$4,$6,$7,$8,$9}}' |   sort -k1,1 -k2,2n -k3,3n -k5,5 | bedtools cluster -d {params.window} > {output.collapse}
         """
     
 
@@ -794,8 +846,8 @@ rule get_fasta_around_is:
 
 rule get_stats_fq:
     input: 
-     rules.merge_samples_i2.output.R1,
-     rules.merge_samples_i2.output.R2,
+     "00-demultiplexing/{sample}_R1.fastq.gz",
+     "00-demultiplexing/{sample}_R2.fastq.gz",
      rules.trim_ODN.output.R1,
      rules.trim_ODN.output.R2,
      rules.filter_reads.output.R1,
@@ -806,16 +858,6 @@ rule get_stats_fq:
     shell: """
         seqkit stat -j {threads} -a -T {input} > {output}
         """
-
-def get_output_files(wildcards):
-    # Custom logic to determine output file pattern
-    if wildcards.side == "3":
-        return "06-offPredict/{gen}_{side}_{grna}_{pam}.csv".format(gen=wildcards.gen, grna=wildcards.grna, pam=wildcards.pam,side=wildcards.side)
-    else:
-        return "06-offPredict/{gen}_{side}_{pam}_{grna}.csv".format(gen=wildcards.gen, grna=wildcards.grna, pam=wildcards.pam,side=wildcards.side)
-
-
-
 
 rule predict_offtarget_SWOffinder:
     input: 

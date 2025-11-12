@@ -80,7 +80,7 @@ pam_length <- nchar(pam)
 
 max_edits <- as.numeric(args[8])
 
-bulges <- as.logical(toupper(args[9]))
+bulges <- as.logical(str_to_upper(args[9]))
 
 pam_side <- args[10]
 

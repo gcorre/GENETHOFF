@@ -1,4 +1,4 @@
-This is cutadapt 5.0 with Python 3.12.11
+This is cutadapt 5.0 with Python 3.12.12
 Command line parameters: -j 6 --pair-filter=any --minimum-length 25 --too-short-output 02-filtering/VEGFA_s1_K562_pos_R1.UMI.ODN.trimmed.tooshort.fastq.gz --too-short-paired-output 02-filtering/VEGFA_s1_K562_pos_R2.UMI.ODN.trimmed.tooshort.fastq.gz --output 02-filtering/VEGFA_s1_K562_pos_R1.UMI.ODN.trimmed.filtered.fastq.gz --paired-output 02-filtering/VEGFA_s1_K562_pos_R2.UMI.ODN.trimmed.filtered.fastq.gz 01-trimming/VEGFA_s1_K562_pos_R1.ODN.UMI.trimmed.fastq.gz 01-trimming/VEGFA_s1_K562_pos_R2.ODN.UMI.trimmed.fastq.gz
 Processing paired-end reads on 6 cores ...
 

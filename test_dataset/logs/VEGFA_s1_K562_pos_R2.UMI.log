@@ -1,15 +1,15 @@
-This is cutadapt 5.0 with Python 3.12.11
-Command line parameters: -j 6 -u -8 --rename={id}_{r1.cut_suffix} {comment} -o 01-trimming/VEGFA_s1_K562_pos_I3.ODN.UMI.fastq.gz -p 01-trimming/VEGFA_s1_K562_pos_R2.ODN.UMI.fastq.gz 01-trimming/VEGFA_s1_K562_pos_I3.ODN.fastq.gz 01-trimming/VEGFA_s1_K562_pos_R2.ODN.fastq.gz
+This is cutadapt 5.0 with Python 3.12.12
+Command line parameters: -j 6 -u -8 --rename={id}_{r1.cut_suffix} {comment} -o /dev/null -p 01-trimming/VEGFA_s1_K562_pos_R2.UMI.fastq.gz 00-demultiplexing/VEGFA_s1_K562_pos_I2.fastq.gz 00-demultiplexing/VEGFA_s1_K562_pos_R2.fastq.gz
 Processing paired-end reads on 6 cores ...
 
 === Summary ===
 
-Total read pairs processed:          1,092,756
-Pairs written (passing filters):     1,092,756 (100.0%)
+Total read pairs processed:          1,175,378
+Pairs written (passing filters):     1,175,378 (100.0%)
 
-Total basepairs processed:   149,231,439 bp
-  Read 1:     8,742,048 bp
-  Read 2:   140,489,391 bp
-Total written (filtered):    140,489,391 bp (94.1%)
-  Read 1:             0 bp
-  Read 2:   140,489,391 bp
+Total basepairs processed:   196,288,126 bp
+  Read 1:    18,806,048 bp
+  Read 2:   177,482,078 bp
+Total written (filtered):    186,885,102 bp (95.2%)
+  Read 1:     9,403,024 bp
+  Read 2:   177,482,078 bp

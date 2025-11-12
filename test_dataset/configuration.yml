@@ -4,17 +4,15 @@ affiliation: "Therapeutic Gene Editing - GENETHON, INSERM U951, Paris-Saclay Uni
 contact: "gcorre@genethon.fr"
 version: 'V1.0'
 
-
-## Main options
 clean_intermediates_files: 'TRUE'
 skip_demultiplexing: 'FALSE'
-#quantification: "umi" # use "umi" or "fragment" for the quantification (only if rescue_R2 is 'FALSE")
-rescue_R2: "TRUE"     # Rescue R2 reads if R1 is too short or the pair doesn't align properly.
+quantification: "umi" # use "umi" or "fragment" for the quantification (only if rescue_R2 is 'no")
+rescue_R2: "FALSE"     # Rescue R2 reads if R1 is too short or the pair doesn't align properly.
 
 ## Library informations
 sampleInfo_path: "test_datasheet.csv"
 
-read_path:  "./"
+read_path:  ""
 R1: "Undetermined_S0_L001_R1_001.fastq.gz"
 R2: "Undetermined_S0_L001_R2_001.fastq.gz"
 I1: "Undetermined_S0_L001_I1_001.fastq.gz"
@@ -24,11 +22,11 @@ I2: "Undetermined_S0_L001_I2_001.fastq.gz"
 ################################################
 ## path to references
 genome:
-  GRCh38:
-    fasta: "/media/References/Human/ensembl/GRCh38/Sequences/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
-    index: "/media/References/Human/ensembl/GRCh38/Indexes/Bowtie2/Homo_sapiens.GRCh38.dna.primary_assembly" # path to index created during the run if not existing yet
-    annotation: "/media/References/Human/ensembl/GRCh38/Annotations/Homo_sapiens.GRCh38.113.chr.gtf.gz"
-    oncogene_list: "/media/References/Human/ensembl/GRCh38/Annotations/OncoList_OncoKB_GRCh38_2025-07-04.tsv"
+  GRCh38p14:
+    fasta: "/media/DATA/references/human/GRCh38p14/gencode/fasta/GRCh38.primary_assembly.genome.chr.fa"
+    index: "/media/DATA/references/human/GRCh38p14/gencode/index/GRCh38.primary_assembly.genome.chr" # path to index created during the run if not existing yet
+    annotation: "/media/DATA/references/human/GRCh38p14/gencode/annotations/gencode.v49.primary_assembly.basic.annotation.gtf.gz"
+    oncogene_list: "/media/DATA/projects/GENETHOFF/02-ressources/OncoList_OncoKB_GRCh38_2025-07-04.tsv"
   mouse:
     fasta: ""
     index: ""
@@ -54,7 +52,7 @@ UMI_hamming_distance: 1         # min distance to cluster UMI using network-base
 UMI_deduplication: "Adjacency"  # method to correct UMI (cluster or Adjacency)
 UMI_pattern: "NNWNNWNN"  
 UMI_filter: "TRUE"              # If TRUE, remove UMIs that do no match the expected pattern [FALSE or TRUE]
-UMI_side: "5"                   # position of the UMI in the I2 read sequence (ie UMI+BC -> "5" or BC+UMI --> "3")
+UMI_side: "3"                   # position of the UMI in the I2 read sequence: 5 = UMI+BC, 3 = BC+UMI
 ################################################
 
 
@@ -63,8 +61,8 @@ UMI_side: "5"                   # position of the UMI in the I2 read sequence (i
 tolerate_bulges: "TRUE"           # whether to include gaps in the gRNA alignment (this will change the gap penalty during SW pairwise alignment)
 max_edits_crRNA: 6                # filter clusters with less or equal than n edits in the crRNA sequence (edits = substitutions + INDELs)
 ISbinWindow: 100                  # insertion sites closer than 'ISbinWindow' will be clustered together
-minReadsPerUMI: 4                 # Min number of reads per UMIs (>=)
-minUMIPerIS: 4                    # Min number of UMI per IS (>=)
+minReadsPerUMI: 3                 # Min number of reads per UMIs (>=)
+minUMIPerIS: 2                    # Min number of UMI per IS (>=)
 slopSize: 50                      # window size (bp) around IS (both directions) to identify gRNA sequence (ie 50bp = -50bp to +50bp)
 min_predicted_distance: 100       # distance between cut site and predicted cut site to consider as predicted
 ################################################

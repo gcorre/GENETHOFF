@@ -42,6 +42,8 @@ Pipeline version: **`r config$version`**
 
 The analysis was performed **`r ifelse(config$tolerate_bulges==TRUE, "with","without")`** bulge tolerance.
 
+The quantification is based on **`r ifelse(str_to_lower(config$quantification)=="umi", "UMI counts","fragments length")`** .
+
 All parameters can be found in [Configuration settings] at the end of this document.
 
 ------------------------------------------------------------------------
