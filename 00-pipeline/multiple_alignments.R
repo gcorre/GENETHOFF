@@ -80,7 +80,7 @@ pam_length <- nchar(pam)
 
 max_edits <- as.numeric(args[8])
 
-bulges <- toupper(args[9])
+bulges <- as.logical(str_to_upper(args[9]))
 
 pam_side <- args[10]
 
@@ -98,7 +98,7 @@ offset <- if((pam_side == "3" & sign(offset) < 0) |(pam_side == "5" & sign(offse
 # Change gap penalty if bulges are tolerated or not
 
 gap_open_penalty <- 10 ## default (this tolerate gap (bulges))
-if(bulges == "FALSE"){
+if(bulges == FALSE){
   gap_open_penalty <- gap_open_penalty *100  # this forces alignment without gap
 }
 
