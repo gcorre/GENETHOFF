@@ -333,15 +333,37 @@ rule prepare_annotations:
     """    
 
 # make a barcode file with I1 sequences for demultiplexing.
-rule make_indexes_fasta_i1:
+rule make_index_file:
     input: 
-    output: temp("demultiplexing_barcodes_i1.fa")
+      I1=os.path.join(config["read_path"], config["I1"]), 
+      I2=os.path.join(config["read_path"], config["I2"])
+    output: 
+      I3=temp("index_files.fastq")
+    conda: "GENETHOFF"
+    threads: 6
+    params: UMI_side=str(config["UMI_side"]) 
+    shell: """
+        if [ {params.UMI_side} = "3" ]; then
+            paste -d "\t" <(gzip -dc {input.I1}) <(gzip -dc {input.I2}) | awk 'BEGIN{{FS="\\t";OFS=""}} {{if( NR % 4 ==1 || NR % 4 == 3) {{print $1}} else {{print $1,$2}}}}' > {output.I3}
+        else
+            paste -d "\t" <(gzip -dc {input.I2}) <(gzip -dc {input.I1}) | awk 'BEGIN{{FS="\\t";OFS=""}} {{if( NR % 4 ==1 || NR % 4 == 3) {{print $1}} else {{print $1,$2}}}}' > {output.I3}
+        fi
+        """
+
+
+rule make_index_barcodes:
+    input: 
+    output: temp("demultiplexing.fa")
+    params: UMI_side=str(config["UMI_side"]) 
     run: 
         sample_count = defaultdict(int)
-        with open("demultiplexing_barcodes_i1.fa", 'w') as fasta_file_i1:
-          samplesTable_sub=samplesTable[["sampleName","index1"]].drop_duplicates()
+        with open("demultiplexing.fa", 'w') as fasta_file_i1:
+          samplesTable_sub=samplesTable[["sampleName","index1","index2"]].drop_duplicates()
           for index, row in samplesTable_sub.iterrows():
-            sequence_i1 = row['index1']
+            if params.UMI_side == "3":
+                sequence_i1 = row['index1']+row['index2']
+            else :
+                sequence_i1 = row['index2']+row['index1']
             sample_count[row['sampleName']] += 1
             sample_header = f">{row['sampleName']}-{sample_count[row['sampleName']]}"
             #sample_header = f">{row['sampleName']}"
@@ -350,127 +372,44 @@ rule make_indexes_fasta_i1:
 
 
 
-# demultiplexe libraries based on barcodes in the sampleInfo file and I3 file generated before
-## 
-# check whether an empty library will make the pip to crash (ie wrong index)
-##
-
-rule demux_I1:
+rule demultiplex_samples:
     input: 
-      R1=branch(lambda wildcards: (
-          str(lookup(dpath="skip_demultiplexing", within=config)).lower() == "false") ,
-          then=os.path.join(config["read_path"], config["R1"]), 
-          otherwise=""
-        ),
-      R2=branch(lambda wildcards: (
-          str(lookup(dpath="skip_demultiplexing", within=config)).lower() == "false") ,
-          then=os.path.join(config["read_path"], config["R2"]), 
-          otherwise=""
-        ),
-      I1=branch(lambda wildcards: (
-            str(lookup(dpath="skip_demultiplexing", within=config)).lower() == "false") ,
-            then=os.path.join(config["read_path"], config["I1"]), 
-            otherwise=""
-        ),
-      I2=branch(lambda wildcards: (
-            str(lookup(dpath="skip_demultiplexing", within=config)).lower() == "false") ,
-            then=os.path.join(config["read_path"], config["I2"]), 
-            otherwise=""
-        ),
-      barcodes=branch(lambda wildcards: (
-            str(lookup(dpath="skip_demultiplexing", within=config)).lower() == "false") ,
-            then=rules.make_indexes_fasta_i1.output, 
-            otherwise=""
-        )
+      R1=os.path.join(config["read_path"], config["R1"]),
+      R2=os.path.join(config["read_path"], config["R2"]),
+      I3=rules.make_index_file.output.I3,
+      barcodes=rules.make_index_barcodes.output
     output: 
-      R1=temp(["00-demultiplexing/{sample}-1_i1_R1.fastq.gz".format(sample=sample) for sample in samples["sampleName"]]),
-      R2=temp(["00-demultiplexing/{sample}-1_i1_R2.fastq.gz".format(sample=sample) for sample in samples["sampleName"]]),
-      I1=temp(["00-demultiplexing/{sample}-1_i1_I1.fastq.gz".format(sample=sample) for sample in samples["sampleName"]]),
-      I2=temp(["00-demultiplexing/{sample}-1_i1_I2.fastq.gz".format(sample=sample) for sample in samples["sampleName"]])
+      R1=temp(["00-demultiplexing/{sample}-1_R1.fastq.gz".format(sample=sample) for sample in samples["sampleName"]]),
+      R2=temp(["00-demultiplexing/{sample}-1_R2.fastq.gz".format(sample=sample) for sample in samples["sampleName"]]),
+      I3=temp(["00-demultiplexing/{sample}-1_I3.fastq.gz".format(sample=sample) for sample in samples["sampleName"]])
     conda: "GENETHOFF"
     log: R1= "logs/demultiplexing_i1_R1.log"
     threads: 6
+    params: UMI_side=config["UMI_side"] 
     shell: """
-        #I2_length=$(seqkit head -n 100 {input.I1} | seqkit stat | awk 'NR == 2 {{print $7}}')
-        
-        cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action trim --no-indels -o 00-demultiplexing/{{name}}_i1_I1.fastq.gz -p 00-demultiplexing/{{name}}_i1_R1.fastq.gz {input.I1} {input.R1} > {log.R1}
-        cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action trim --no-indels -o 00-demultiplexing/{{name}}_i1_I1.fastq.gz -p 00-demultiplexing/{{name}}_i1_R2.fastq.gz {input.I1} {input.R2} > /dev/null
-        cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_i1_I1.fastq.gz -p 00-demultiplexing/{{name}}_i1_I2.fastq.gz {input.I1} {input.I2} > /dev/null
-        """
-  
-
-rule merge_samples_i1:
-  input: 
-    R1="00-demultiplexing/{sample}-1_i1_R1.fastq.gz", 
-    R2="00-demultiplexing/{sample}-1_i1_R2.fastq.gz", 
-    I2="00-demultiplexing/{sample}-1_i1_I2.fastq.gz" 
-  output:
-    R1=temp("00-demultiplexing/{sample}_i1_R1.fastq.gz"), 
-    R2=temp("00-demultiplexing/{sample}_i1_R2.fastq.gz"), 
-    I2=temp("00-demultiplexing/{sample}_i1_I2.fastq.gz")
-  shell:
-    """
-      cat 00-demultiplexing/{wildcards.sample}-*_i1_R1.fastq.gz > {output.R1}
-      cat 00-demultiplexing/{wildcards.sample}-*_i1_R2.fastq.gz > {output.R2}
-      cat 00-demultiplexing/{wildcards.sample}-*_i1_I2.fastq.gz > {output.I2}
-    """
-
-rule make_indexes_fasta_i2:
-  input: 
-  output:temp("demultiplexing_barcodes_i2_{sample}.fa")
-  run: 
-    sample_count = defaultdict(int)
-    with open(output[0], 'w') as fasta_file_i2:
-      samplesTable_sub=samplesTable[samplesTable['sampleName'] == wildcards.sample][["sampleName","index2"]].drop_duplicates()
-      for index, row in samplesTable_sub.iterrows():
-        sequence_i2 = row['index2']
-        sample_count[row['sampleName']] += 1
-        sample_header = f">{row['sampleName']}-{sample_count[row['sampleName']]}"
-        fasta_file_i2.write(sample_header + '\n')
-        fasta_file_i2.write(sequence_i2 + '\n')  
-
-
-
-rule demux_I2:
-  input: 
-    R1=rules.merge_samples_i1.output.R1,
-    R2=rules.merge_samples_i1.output.R2,
-    I2=rules.merge_samples_i1.output.I2,
-    barcodes=rules.make_indexes_fasta_i2.output
-  output: 
-    R1=temp("00-demultiplexing/{sample}-1_i2_R1.fastq.gz"),
-    R2=temp("00-demultiplexing/{sample}-1_i2_R2.fastq.gz"),
-    I2=temp("00-demultiplexing/{sample}-1_i2_I2.fastq.gz")
-  conda: "GENETHOFF"
-  log: R1= "logs/demultiplexing_{sample}_i2_R1.log"
-  params: UMI_side=str(config["UMI_side"]) ## either 5 (left) or 3 (right)
-  threads: 6
-  shell: """
         if [ {params.UMI_side} = "3" ]; then
-          cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_i2_I2.fastq.gz -p 00-demultiplexing/{{name}}_i2_R1.fastq.gz {input.I2} {input.R1} > {log.R1}
-          cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_i2_I2.fastq.gz -p 00-demultiplexing/{{name}}_i2_R2.fastq.gz {input.I2} {input.R2} > /dev/null
+          cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_I3.fastq.gz -p 00-demultiplexing/{{name}}_R1.fastq.gz {input.I3} {input.R1} > {log.R1}
+          cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_I3.fastq.gz -p 00-demultiplexing/{{name}}_R2.fastq.gz {input.I3} {input.R2} > /dev/null
         else
-          cutadapt -a file$:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_i2_I2.fastq.gz -p 00-demultiplexing/{{name}}_i2_R1.fastq.gz {input.I2} {input.R1} > {log.R1}
-          cutadapt -a file$:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_i2_I2.fastq.gz -p 00-demultiplexing/{{name}}_i2_R2.fastq.gz {input.I2} {input.R2} > /dev/null
+          cutadapt -a file$:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_I3.fastq.gz -p 00-demultiplexing/{{name}}_R1.fastq.gz {input.I3} {input.R1} > {log.R1}
+          cutadapt -a file$:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_I3.fastq.gz -p 00-demultiplexing/{{name}}_R2.fastq.gz {input.I3} {input.R2} > /dev/null
         fi
         """
 
-
-
-rule merge_samples_i2:
+rule merge_libraries:
   input: 
-    R1=rules.demux_I2.output.R1,
-    R2=rules.demux_I2.output.R2,
-    I2=rules.demux_I2.output.I2 
+    R1=rules.demultiplex_samples.output.R1,
+    R2=rules.demultiplex_samples.output.R2,
+    I2=rules.demultiplex_samples.output.I3 
   output:
     R1="00-demultiplexing/{sample}_R1.fastq.gz", 
     R2="00-demultiplexing/{sample}_R2.fastq.gz", 
-    I2="00-demultiplexing/{sample}_I2.fastq.gz"
+    I3="00-demultiplexing/{sample}_I3.fastq.gz"
   shell:
     """
-      cat 00-demultiplexing/{wildcards.sample}-*_i2_R1.fastq.gz > {output.R1}
-      cat 00-demultiplexing/{wildcards.sample}-*_i2_R2.fastq.gz > {output.R2}
-      cat 00-demultiplexing/{wildcards.sample}-*_i2_I2.fastq.gz > {output.I2}
+      cat 00-demultiplexing/{wildcards.sample}-*_R1.fastq.gz > {output.R1}
+      cat 00-demultiplexing/{wildcards.sample}-*_R2.fastq.gz > {output.R2}
+      cat 00-demultiplexing/{wildcards.sample}-*_I3.fastq.gz > {output.I3}
     """
 
 # make an I2 file : extract UMI from read header
@@ -493,28 +432,29 @@ rule add_UMI:
     I2=branch(lambda wildcards: (
             str(lookup(dpath="skip_demultiplexing", within=config)).lower() == "true" and not os.path.islink("00-demultiplexing/{sample}_newI2.fastq.gz")) ,
             then=rules.make_I2.output,
-            otherwise="00-demultiplexing/{sample}_I2.fastq.gz"
+            otherwise="00-demultiplexing/{sample}_I3.fastq.gz"
         ),
     R1="00-demultiplexing/{sample}_R1.fastq.gz", 
     R2="00-demultiplexing/{sample}_R2.fastq.gz"
   output: 
     R1=temp("01-trimming/{sample}_R1.UMI.fastq.gz"),
-    R2=temp("01-trimming/{sample}_R2.UMI.fastq.gz")
+    R2=temp("01-trimming/{sample}_R2.UMI.fastq.gz"),
+    I2=temp("01-trimming/{sample}_I2.UMI.fastq.gz")
   threads:6
   log: R1="logs/{sample}_R1.UMI.log", R2="logs/{sample}_R2.UMI.log"    
   conda: "GENETHOFF"
   params:
     UMI=config["UMI_pattern"], ## UMI pattern
-    UMI_side=str(config["UMI_side"]) ## either 5 (left) or 3 (right)
+    UMI_side=config["UMI_side"] ## either 5 (left) or 3 (right)
   shell: """
         UMI_length=$(expr length {params.UMI})
         
-        if [ {params.UMI_side} = "5" ]; then
-          cutadapt -j {threads} -u $UMI_length --rename='{{id}}_{{r1.cut_prefix}} {{comment}}' -o /dev/null -p {output.R1} {input.I2} {input.R1} > {log.R1}
-          cutadapt -j {threads} -u $UMI_length --rename='{{id}}_{{r1.cut_prefix}} {{comment}}' -o /dev/null -p {output.R2} {input.I2} {input.R2} > {log.R2}
+        if [ "{params.UMI_side}" = "5" ]; then
+          cutadapt -j {threads} -u $UMI_length --rename='{{id}}_{{r1.cut_prefix}} {{comment}}' -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
+          cutadapt -j {threads} -u $UMI_length --rename='{{id}}_{{r1.cut_prefix}} {{comment}}' -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
         else
-          cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o /dev/null -p {output.R1} {input.I2} {input.R1} > {log.R1}
-          cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o /dev/null -p {output.R2} {input.I2} {input.R2} > {log.R2}
+          cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
+          cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
         fi 
         """
 
