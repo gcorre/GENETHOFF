@@ -68,7 +68,7 @@ sp <- split(bed_sub,f = paste(bed_sub$site, bed_sub$orientation,sep=";"))
 
 
 # Define function to perform UMI correction -----------------------------------------
-group_umis <- function(umis, counts, hamming_threshold = 1,graph=F,type = "Adjacency") {
+group_umis <- function(umis, counts, hamming_threshold = 1,graph=F,type = "adjacency") {
   # Calculate Hamming distance matrix
   dist_matrix <- stringdistmatrix(umis, umis, method = "hamming")
   
@@ -246,20 +246,20 @@ bed_corrected <- bed %>%
 
 
 # Check if UMI pattern is correct ---------------------------------------------------
-
-has_motif <- vcountPattern(motif, DNAStringSet(bed_corrected$UMI), fixed = FALSE)
+## --> this has been change directly in the trimming steps.
+# has_motif <- vcountPattern(motif, DNAStringSet(bed_corrected$UMI), fixed = FALSE)
+# 
+# bed_corrected <- bed_corrected %>% 
+#   ungroup %>% 
+#   mutate("has_motif"= as.logical(has_motif))
+# 
+# 
+# if(filt.umi==TRUE){
+#   bed_corrected <- bed_corrected %>% filter(has_motif == T)
+# }
 
 bed_corrected <- bed_corrected %>% 
-  ungroup %>% 
-  mutate("has_motif"= as.logical(has_motif))
-
-
-if(filt.umi==TRUE){
-  bed_corrected <- bed_corrected %>% filter(has_motif == T)
-}
-
-bed_corrected <- bed_corrected %>% 
-  select(chr,start,end,UMI,orientation,strand,count,avg_qual,UMIs,UMIs_count,nUMIs,has_motif)
+  select(chr,start,end,UMI,orientation,strand,count,avg_qual,UMIs,UMIs_count,nUMIs)
 
 write.table(bed_corrected, file = output, sep="\t", quote = F, row.names = F)
 

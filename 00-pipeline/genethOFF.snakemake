@@ -445,16 +445,17 @@ rule add_UMI:
   conda: "GENETHOFF"
   params:
     UMI=config["UMI_pattern"], ## UMI pattern
-    UMI_side=config["UMI_side"] ## either 5 (left) or 3 (right)
+    UMI_side=config["UMI_side"], ## either 5 (left) or 3 (right)
+    UMI_error=config["UMI_error_rate"]
   shell: """
         UMI_length=$(expr length {params.UMI})
         
         if [ "{params.UMI_side}" = "5" ]; then
-          cutadapt -j {threads} -u $UMI_length --rename='{{id}}_{{r1.cut_prefix}} {{comment}}' -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
-          cutadapt -j {threads} -u $UMI_length --rename='{{id}}_{{r1.cut_prefix}} {{comment}}' -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
+          cutadapt -j {threads} -g "^{params.UMI}" -e {params.UMI_error}  --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
+          cutadapt -j {threads} -g "^{params.UMI}" -e {params.UMI_error}  --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
         else
-          cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
-          cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
+          cutadapt -j {threads} -a "{params.UMI}$" -e {params.UMI_error}  --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
+          cutadapt -j {threads} -a "{params.UMI}$" -e {params.UMI_error}  --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
         fi 
         """
 
@@ -750,6 +751,7 @@ rule Collapse_UMI_IS:
         
         ##################################################################
         # aggregate UMI per IS
+        # headers in input : chr, start, end, UMI (Main UMI after correction), orientation, strand, count, avg_qual,UMIs(list of UMIs grouped after correction), UMIs_count(reads count per UMI grouped), nUMIs ( nUMIs grouped after correction)
         ##################################################################
         
         awk '$0 !~ "start" && $7>={params.minReadsPerUMI}' {input} | sort -k1,1 -k2,2n -k3,3n -k5,5 -k 6,6 | bedtools groupby -g 1,2,3,5,6 -c 4,7,4,7,8  -o count_distinct,sum,collapse,collapse,median  | awk 'BEGIN{{OFS="\\t";FS="\\t"}} $6>={params.minUMIPerIS} {{print $1,$2,$3,"ID_"NR,$10,$5,$4,$6,$7,$8,$9}}' |   sort -k1,1 -k2,2n -k3,3n -k5,5 | bedtools cluster -d {params.window} > {output.collapse}
