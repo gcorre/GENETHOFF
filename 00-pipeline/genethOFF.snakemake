@@ -219,7 +219,6 @@ if config["skip_demultiplexing"].lower() == "false":
     #########################################################
     ## For already demultiplexed libraries
     ## check that R1, R2 are present in the path defined in the SAMPLE DATASHEET
-    ## UMI must be in the R1 and R2 headers in the format : NNNNNNNN+NNNNNNNNNNNNNNNN (8+16 in guideseq, added during demultiplexing from NGS machine)
     ## each fastq file must start with the sample name as defined in the SAMPLE DATASHEET
     ## a symlink from each file is created into 00-demultiplexing so the pipeline  will start after the demultiplexing step
     ########################################################
@@ -271,7 +270,7 @@ else:
       matching_files = glob.glob(motif)
       if matching_files:
         print(f"      -" + GREEN+u'\u2705'+RESET +" "+ matching_files[0])
-        symlink_path = os.path.join(demultiplexing_dir, f"{sample}_newI2.fastq.gz")
+        symlink_path = os.path.join(demultiplexing_dir, f"{sample}_I3.fastq.gz")
         if not os.path.islink(symlink_path):
           os.symlink(matching_files[0], symlink_path)
       print(GREEN +  "      All required files were found for sample "+sample + RESET + "\n")
@@ -417,7 +416,7 @@ rule make_I2:
   input:
     R1="00-demultiplexing/{sample}_R1.fastq.gz"
   output:
-    temp("00-demultiplexing/{sample}_newI2.fastq.gz")
+    temp("00-demultiplexing/{sample}_I3b.fastq.gz")
   threads: 1
   conda: "GENETHOFF"
   shell: """
@@ -430,7 +429,7 @@ rule make_I2:
 rule add_UMI:
   input: 
     I2=branch(lambda wildcards: (
-            str(lookup(dpath="skip_demultiplexing", within=config)).lower() == "true" and not os.path.islink("00-demultiplexing/{sample}_newI2.fastq.gz")) ,
+            str(lookup(dpath="skip_demultiplexing", within=config)).lower() == "true" and not os.path.islink(f"00-demultiplexing/{wildcards.sample}_I3.fastq.gz")) ,
             then=rules.make_I2.output,
             otherwise="00-demultiplexing/{sample}_I3.fastq.gz"
         ),
@@ -548,7 +547,8 @@ if (config["aligner"]  == "bowtie2" or config["aligner"]  == "Bowtie2") :
           R2=rules.filter_reads.output.R2
         output: 
           sam=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sam"),
-          R2_unmapped="03-align/{sample}_R2.UMI.ODN.trimmed.unmapped.fastq.gz"
+          R1_unmapped=temp("03-align/{sample}_R1.UMI.ODN.trimmed.unmapped.fastq.gz"),
+          R2_unmapped=temp("03-align/{sample}_R2.UMI.ODN.trimmed.unmapped.fastq.gz")
         threads: 6
         log: "logs/{sample}.UMI.ODN.trimmed.filtered.align.log"
         conda: "GENETHOFF"
@@ -628,7 +628,7 @@ rule sort_aligned_name:
     input: 
       bam=rules.sort_aligned.output.bam
     output: 
-      bamName=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sortedName.filtered.bam")
+      bamName="03-align/{sample}.UMI.ODN.trimmed.filtered.sortedName.filtered.bam"
     threads: 6
     conda: "GENETHOFF"
     message: "Sort reads by name"
@@ -654,6 +654,8 @@ rule call_IS:
     shell: """
         bedtools bamtobed -bedpe -mate1 -i {input} > {output.tmp}
         if [ {params.quantif} = "umi" ] ; 
+        
+        
         then 
             UMI_length=$(expr length {params.UMI})
             # read R2 contains the genome/ODN junction (use $10 of PE bed = mate 2)
@@ -661,13 +663,18 @@ rule call_IS:
             ##################################################################
             # count number of reads per UMI and per IS (pos and strand separated)
             ##################################################################
-            awk 'BEGIN{{OFS="\\t";FS="\\t"}} ($1 == $4) {{split($7,a,"_"); if($10=="+") print $4,$5,$5,a[1],a[2],a[3],$8,$10,$3-$5; else print $4,$6-1,$6-1,a[1],a[2],a[3],$8,$10,$6-$2}}' {output.tmp} | sort -k1,1 -k2,3n -k6,6 -k5,5 -k8,8 | bedtools groupby -g 1,2,3,6,5,8 -c 4,7 -o count_distinct,median  > {output.umi}
+            awk 'BEGIN{{OFS="\\t";FS="\\t"}} ($1 == $4) {{split($7,a,"_"); if($10=="+") print $4,$5,$5,a[1],a[2],a[3],$8,$10; else print $4,$6-1,$6-1,a[1],a[2],a[3],$8,$10}}' {output.tmp} | sort -k1,1 -k2,3n -k6,6 -k8,8 -k5,5 | bedtools groupby -g 1,2,3,6,8,5 -c 4,7 -o count_distinct,median  > {output.umi}
+            
+            
         else 
             ##################################################################
             # count number of reads per fragment length and per IS (pos and strand separated)
             ##################################################################
-            awk 'BEGIN{{OFS="\\t";FS="\\t"}} ($1 == $4) {{split($7,a,"_"); if($10=="+") print $4,$5,$5,a[1],$3-$5,a[2],$8,$10,$3-$5; else print $4,$6-1,$6-1,a[1],$6-$2,a[2],$8,$10,$6-$2}}' {output.tmp} | sort -k1,1 -k2,3n -k6,6 -k5,5n -k8,8 | bedtools groupby -g 1,2,3,6,5,8 -c 4,7 -o count_distinct,median | awk 'BEGIN{{OFS="\\t";FS="\\t"}} {{print $1,$2,$3,$5,$4,$6,$7,$8}}'  > {output.umi}
+            awk 'BEGIN{{OFS="\\t";FS="\\t"}} ($1 == $4) {{split($7,a,"_"); if($10=="+") print $4,$5,$5,a[1],$3-$5,a[2],$8,$10,$3-$5; else print $4,$6-1,$6-1,a[1],$6-$2,a[2],$8,$10,$6-$2}}' {output.tmp} | sort -k1,1 -k2,3n -k6,6 -k8,8 -k5,5n | bedtools groupby -g 1,2,3,6,8,5 -c 4,7 -o count_distinct,median  > {output.umi}
         fi
+        
+        
+        ## final table headers : 'chr','start','end','PCR_orientation','strand','UMI','count','Qual'
         """
 
 
@@ -719,7 +726,7 @@ rule callIS_R2rescued:
       # count number of reads per UMI and per IS (pos and strand separated)
       ##################################################################
 
-      awk 'BEGIN{{OFS="\\t";FS="\\t"}} {{split($4,a,"_"); if($6=="+") print $1,$2,$2,a[1],a[2],a[3],$5,$6,$3-$2; else print $1,$3-1,$3-1,a[1],a[2],a[3],$5,$6,$3-$2}}' {output.tmp} | sort -k1,1 -k2,3n -k6,6 -k5,5 -k8,8 | bedtools groupby -g 1,2,3,6,5,8 -c 4,7 -o count_distinct,median  > {output.umi}
+      awk 'BEGIN{{OFS="\\t";FS="\\t"}} {{split($4,a,"_"); if($6=="+") print $1,$2,$2,a[1],a[2],a[3],$5,$6; else print $1,$3-1,$3-1,a[1],a[2],a[3],$5,$6}}' {output.tmp} | sort -k1,1 -k2,3n -k6,6 -k8,8 -k5,5 | bedtools groupby -g 1,2,3,6,8,5 -c 4,7 -o count_distinct,median  > {output.umi}
       
       """
 
@@ -754,7 +761,7 @@ rule Collapse_UMI_IS:
         # headers in input : chr, start, end, UMI (Main UMI after correction), orientation, strand, count, avg_qual,UMIs(list of UMIs grouped after correction), UMIs_count(reads count per UMI grouped), nUMIs ( nUMIs grouped after correction)
         ##################################################################
         
-        awk '$0 !~ "start" && $7>={params.minReadsPerUMI}' {input} | sort -k1,1 -k2,2n -k3,3n -k5,5 -k 6,6 | bedtools groupby -g 1,2,3,5,6 -c 4,7,4,7,8  -o count_distinct,sum,collapse,collapse,median  | awk 'BEGIN{{OFS="\\t";FS="\\t"}} $6>={params.minUMIPerIS} {{print $1,$2,$3,"ID_"NR,$10,$5,$4,$6,$7,$8,$9}}' |   sort -k1,1 -k2,2n -k3,3n -k5,5 | bedtools cluster -d {params.window} > {output.collapse}
+        awk '$0 !~ "start" && $7>={params.minReadsPerUMI}' {input} | sort -k1,1 -k2,2n -k3,3n -k5,5 -k 6,6 | bedtools groupby -g 1,2,3,5,6 -c 4,7,4,7,8  -o count_distinct,sum,collapse,collapse,median  | awk 'BEGIN{{OFS="\\t";FS="\\t"}} $6>={params.minUMIPerIS} {{print $1,$2,$3,"ID_"NR,$10,$5,$4,$6,$7,$8,$9}}' |   sort -k1,1 -k2,2n -k3,3n | bedtools cluster -d {params.window} > {output.collapse}
         """
     
 

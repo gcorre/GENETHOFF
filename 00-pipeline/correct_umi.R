@@ -48,20 +48,20 @@ if(rescueR2==TRUE){
   bed <- bind_rows(bed,bed_rescuedR2)
 }
 
-names(bed) <- c('chr','start','end','orientation','UMI','strand', 'count','Qual')
+names(bed) <- c('chr','start','end','orientation','strand','UMI','count','Qual')
 
 
 
 # Select sites to correct UMIs -----------------------------------------------------------
 
 bed <- bed %>%  
-  unite("site", chr,start,end,strand,remove = F)
+  unite("site", chr,start,end,orientation,strand,remove = F)
 
 to_process <- bed %>% dplyr::count(site) %>% filter(n>1) %>% distinct(site) # get sites with multiple UMIs
 
 bed_sub <- bed %>% semi_join(to_process)
 
-sp <- split(bed_sub,f = paste(bed_sub$site, bed_sub$orientation,sep=";"))
+sp <- split(bed_sub,f = bed_sub$site)
 
 
 
@@ -216,12 +216,11 @@ sp2 <- lapply(sp, function(x){
 # collapse all
 corrected <- sp2 %>% 
   bind_rows(.id="site") %>% 
-  distinct() %>% 
-  separate(site, into =c("site","orientation"),sep = ";")
+  distinct() 
 
 # annotate UMI with their UMI node sequence and aggregate
 w <- bed_sub %>% 
-  left_join(corrected , by = c("site","orientation","UMI")) %>% 
+  left_join(corrected , by = c("site","UMI")) %>% 
   group_by(chr,start,end,UMI=UMI_node,strand,orientation) %>% 
   summarise(
     avg_qual = sum(count*Qual)/sum(count),
@@ -229,7 +228,7 @@ w <- bed_sub %>%
     UMIs_count = toString(count),
     count = sum(count),
     nUMIs = n()) %>% 
-  ungroup
+  ungroup()
 
 
 # Aggregate with single UMI sites ---------------------------------------------------
