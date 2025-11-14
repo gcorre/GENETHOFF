@@ -761,9 +761,8 @@ rule Collapse_UMI_IS:
         # headers in input : chr, start, end, orientation, strand, UMI (Main UMI after correction), count, avg_qual,UMIs(list of UMIs grouped after correction), UMIs_count(reads count per UMI grouped), nUMIs ( nUMIs grouped after correction)
         ##################################################################
         
-        #awk '$0 !~ "start" && $7>={params.minReadsPerUMI}' {input} | sort -k1,1 -k2,2n -k3,3n -k5,5 -k 6,6 | bedtools groupby -g 1,2,3,5,6 -c 4,7,4,7,8  -o count_distinct,sum,collapse,collapse,median  | awk 'BEGIN{{OFS="\\t";FS="\\t"}} $6>={params.minUMIPerIS} {{print $1,$2,$3,"ID_"NR,$10,$5,$4,$6,$7,$8,$9}}' |   sort -k1,1 -k2,2n -k3,3n | bedtools cluster -d {params.window} > {output.collapse}
-        
         awk '$0 !~ "start" && $7>={params.minReadsPerUMI}' {input} | sort -k1,1 -k2,2n -k3,3n -k4,4 -k5,5 -k 6,6 | bedtools groupby -g 1,2,3,4,5 -c 6,7,6,7,8  -o count_distinct,sum,collapse,collapse,median  | awk 'BEGIN{{OFS="\\t";FS="\\t"}} $6>={params.minUMIPerIS} {{print $1,$2,$3,"ID_"NR,$10,$5,$4,$6,$7,$8,$9}}'   |   sort -k1,1 -k2,2n -k3,3n | bedtools cluster -d {params.window} > {output.collapse}
+
         """
     
 
