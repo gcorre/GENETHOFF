@@ -1,15 +1,45 @@
-This is cutadapt 5.0 with Python 3.12.12
-Command line parameters: -j 6 -u -8 --rename={id}_{r1.cut_suffix} {comment} -o /dev/null -p 01-trimming/VEGFA_s1_K562_neg_R2.UMI.fastq.gz 00-demultiplexing/VEGFA_s1_K562_neg_I2.fastq.gz 00-demultiplexing/VEGFA_s1_K562_neg_R2.fastq.gz
+This is cutadapt 5.0 with Python 3.12.11
+Command line parameters: -j 6 -a NNWNNWNN$ -e 0 --rename={id}_{r1.match_sequence} {comment} --action=none --discard-untrimmed -o 01-trimming/VEGFA_s1_K562_neg_I2.UMI.fastq.gz -p 01-trimming/VEGFA_s1_K562_neg_R2.UMI.fastq.gz 00-demultiplexing/VEGFA_s1_K562_neg_I3b.fastq.gz 00-demultiplexing/VEGFA_s1_K562_neg_R2.fastq.gz
 Processing paired-end reads on 6 cores ...
 
 === Summary ===
 
 Total read pairs processed:          2,297,044
-Pairs written (passing filters):     2,297,044 (100.0%)
+  Read 1 with adapter:               2,277,668 (99.2%)
+
+== Read fate breakdown ==
+Pairs discarded as untrimmed:           19,376 (0.8%)
+Pairs written (passing filters):     2,277,668 (99.2%)
 
 Total basepairs processed:   383,606,348 bp
   Read 1:    36,752,704 bp
   Read 2:   346,853,644 bp
-Total written (filtered):    365,229,996 bp (95.2%)
-  Read 1:    18,376,352 bp
-  Read 2:   346,853,644 bp
+Total written (filtered):    380,370,556 bp (99.2%)
+  Read 1:    36,442,688 bp
+  Read 2:   343,927,868 bp
+
+=== First read: Adapter 1 ===
+
+Sequence: NNWNNWNN; Type: anchored 3'; Length: 8; Trimmed: 2277668 times
+
+No. of allowed errors: 0
+
+Bases preceding removed adapters:
+  A: 0.0%
+  C: 0.0%
+  G: 0.0%
+  T: 100.0%
+  none/other: 0.0%
+WARNING:
+    The adapter is preceded by 'T' extremely often.
+    The provided adapter sequence could be incomplete at its 5' end.
+    Ignore this warning when trimming primers.
+
+Overview of removed sequences
+length	count	expect	max.err	error counts
+8	2277668	35.1	0	2277668
+
+
+WARNING:
+    One or more of your adapter sequences may be incomplete.
+    Please see the detailed output above.

@@ -4,13 +4,13 @@ affiliation: "Therapeutic Gene Editing - GENETHON, INSERM U951, Paris-Saclay Uni
 contact: "gcorre@genethon.fr"
 version: 'V1.0'
 
-clean_intermediates_files: 'TRUE'
-skip_demultiplexing: 'FALSE'
+clean_intermediates_files: 'FALSE'
+skip_demultiplexing: 'TRUE'
 quantification: "umi" # use "umi" or "fragment" for the quantification (only if rescue_R2 is 'no")
-rescue_R2: "FALSE"     # Rescue R2 reads if R1 is too short or the pair doesn't align properly.
+rescue_R2: "TRUE"     # Rescue R2 reads if R1 is too short or the pair doesn't align properly.
 
 ## Library informations
-sampleInfo_path: "test_datasheet.csv"
+sampleInfo_path: "sampleInfo.csv"
 
 read_path:  ""
 R1: "Undetermined_S0_L001_R1_001.fastq.gz"
@@ -22,11 +22,11 @@ I2: "Undetermined_S0_L001_I2_001.fastq.gz"
 ################################################
 ## path to references
 genome:
-  GRCh38p14:
-    fasta: "/media/DATA/references/human/GRCh38p14/gencode/fasta/GRCh38.primary_assembly.genome.chr.fa"
-    index: "/media/DATA/references/human/GRCh38p14/gencode/index/GRCh38.primary_assembly.genome.chr" # path to index created during the run if not existing yet
-    annotation: "/media/DATA/references/human/GRCh38p14/gencode/annotations/gencode.v49.primary_assembly.basic.annotation.gtf.gz"
-    oncogene_list: "/media/DATA/projects/GENETHOFF/02-ressources/OncoList_OncoKB_GRCh38_2025-07-04.tsv"
+  GRCh38:
+    fasta: "/media/References/Human/ensembl/GRCh38/Sequences/Homo_sapiens.GRCh38.dna.primary_assembly_ChrOnly.fa"
+    index: "/media/References/Human/ensembl/GRCh38/Indexes/Bowtie2/Homo_sapiens.GRCh38.dna.primary_assembly_ChrOnly"
+    annotation: "/media/References/Human/ensembl/GRCh38/Annotations/Homo_sapiens.GRCh38.113.chr.gtf.gz"
+    oncogene_list: "/media/References/Human/ensembl/GRCh38/Annotations/OncoList_OncoKB_GRCh38_2025-07-04.tsv"
   mouse:
     fasta: ""
     index: ""
@@ -50,9 +50,10 @@ maxFragLength: 1500        # Maximal fragment length after alignment
 minMAPQ: 20                      # Min MAPQ score to keep alignments 
 UMI_hamming_distance: 1         # min distance to cluster UMI using network-based deduplication, use [0] to keep raw UMIs
 UMI_deduplication: "Adjacency"  # method to correct UMI (cluster or Adjacency)
-UMI_pattern: "NNWNNWNN"  
+UMI_pattern: "NNWNNWNN"
 UMI_filter: "TRUE"              # If TRUE, remove UMIs that do no match the expected pattern [FALSE or TRUE]
 UMI_side: "3"                   # position of the UMI in the I2 read sequence: 5 = UMI+BC, 3 = BC+UMI
+UMI_error_rate: 0
 ################################################
 
 
@@ -110,9 +111,7 @@ iguideseq:
     R1_trailing: "TCGCGTATACCGTTATTAACATATGACAACTCAA"
     R2_leading: "TTGAGTTGTCATATGTTAATAACGGTATACGCGA"
     R2_trailing: "AGATCGGAAGAGCGTCGTGT"
-    
-    
-    
+
 olitagseq:
   positive:
     R1_trailing: "GGGGTTTAATTGAGTTGTCATATGTT"
