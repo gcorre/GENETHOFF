@@ -19,12 +19,10 @@ library(tidyverse,quietly = T, verbose = F,warn.conflicts = F)
 args <- commandArgs(trailingOnly = T)
 file <- args[1]
 bed <- read.delim(file, header = F) %>% mutate(V1 = as.character(V1))
-motif <- args[2]
-filt.umi <- as.logical(str_to_upper(args[3]))
-hamming_threshold <- as.numeric(args[4])
-method <- str_to_lower(args[5])
-output <- args[6]
-rescueR2 <- as.logical(str_to_upper(args[7]))
+hamming_threshold <- as.numeric(args[2])
+method <- str_to_lower(args[3])
+output <- args[4]
+rescueR2 <- as.logical(str_to_upper(args[5]))
 
 ## debug
 # 

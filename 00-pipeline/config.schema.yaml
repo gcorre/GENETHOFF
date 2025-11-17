@@ -18,15 +18,16 @@ properties:
   tolerate_bulges:
     enum: ["true","false","TRUE","FALSE"]
     type: string
-  UMI_filter:
-    enum: ["TRUE","FALSE"]
-    type: string
   UMI_deduplication:
     enum: ["Adjacency","cluster"]
     type: string
   UMI_side:
     enum: ["5","3"]
     type: string
+  UMI_error_rate:
+    type: integer
+    minimum: 0
+    maximum: 1
 
 required:
   - clean_intermediates_files
@@ -35,6 +36,6 @@ required:
   - sampleInfo_path
   - rescue_R2
   - tolerate_bulges
-  - UMI_filter
   - UMI_deduplication
   - UMI_side
+  - UMI_error_rate
