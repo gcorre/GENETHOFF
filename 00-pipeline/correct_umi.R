@@ -19,12 +19,10 @@ library(tidyverse,quietly = T, verbose = F,warn.conflicts = F)
 args <- commandArgs(trailingOnly = T)
 file <- args[1]
 bed <- read.delim(file, header = F) %>% mutate(V1 = as.character(V1))
-motif <- args[2]
-filt.umi <- as.logical(str_to_upper(args[3]))
-hamming_threshold <- as.numeric(args[4])
-method <- str_to_lower(args[5])
-output <- args[6]
-rescueR2 <- as.logical(str_to_upper(args[7]))
+hamming_threshold <- as.numeric(args[2])
+method <- str_to_lower(args[3])
+output <- args[4]
+rescueR2 <- as.logical(str_to_upper(args[5]))
 
 ## debug
 # 
@@ -48,27 +46,27 @@ if(rescueR2==TRUE){
   bed <- bind_rows(bed,bed_rescuedR2)
 }
 
-names(bed) <- c('chr','start','end','orientation','UMI','strand', 'count','Qual')
+names(bed) <- c('chr','start','end','orientation','strand','UMI','count','Qual')
 
 
 
 # Select sites to correct UMIs -----------------------------------------------------------
 
 bed <- bed %>%  
-  unite("site", chr,start,end,strand,remove = F)
+  unite("site", chr,start,end,orientation,strand,remove = F)
 
 to_process <- bed %>% dplyr::count(site) %>% filter(n>1) %>% distinct(site) # get sites with multiple UMIs
 
 bed_sub <- bed %>% semi_join(to_process)
 
-sp <- split(bed_sub,f = paste(bed_sub$site, bed_sub$orientation,sep=";"))
+sp <- split(bed_sub,f = bed_sub$site)
 
 
 
 
 
 # Define function to perform UMI correction -----------------------------------------
-group_umis <- function(umis, counts, hamming_threshold = 1,graph=F,type = "Adjacency") {
+group_umis <- function(umis, counts, hamming_threshold = 1,graph=F,type = "adjacency") {
   # Calculate Hamming distance matrix
   dist_matrix <- stringdistmatrix(umis, umis, method = "hamming")
   
@@ -216,12 +214,11 @@ sp2 <- lapply(sp, function(x){
 # collapse all
 corrected <- sp2 %>% 
   bind_rows(.id="site") %>% 
-  distinct() %>% 
-  separate(site, into =c("site","orientation"),sep = ";")
+  distinct() 
 
 # annotate UMI with their UMI node sequence and aggregate
 w <- bed_sub %>% 
-  left_join(corrected , by = c("site","orientation","UMI")) %>% 
+  left_join(corrected , by = c("site","UMI")) %>% 
   group_by(chr,start,end,UMI=UMI_node,strand,orientation) %>% 
   summarise(
     avg_qual = sum(count*Qual)/sum(count),
@@ -229,7 +226,7 @@ w <- bed_sub %>%
     UMIs_count = toString(count),
     count = sum(count),
     nUMIs = n()) %>% 
-  ungroup
+  ungroup()
 
 
 # Aggregate with single UMI sites ---------------------------------------------------
@@ -246,20 +243,20 @@ bed_corrected <- bed %>%
 
 
 # Check if UMI pattern is correct ---------------------------------------------------
-
-has_motif <- vcountPattern(motif, DNAStringSet(bed_corrected$UMI), fixed = FALSE)
+## --> this has been change directly in the trimming steps.
+# has_motif <- vcountPattern(motif, DNAStringSet(bed_corrected$UMI), fixed = FALSE)
+# 
+# bed_corrected <- bed_corrected %>% 
+#   ungroup %>% 
+#   mutate("has_motif"= as.logical(has_motif))
+# 
+# 
+# if(filt.umi==TRUE){
+#   bed_corrected <- bed_corrected %>% filter(has_motif == T)
+# }
 
 bed_corrected <- bed_corrected %>% 
-  ungroup %>% 
-  mutate("has_motif"= as.logical(has_motif))
-
-
-if(filt.umi==TRUE){
-  bed_corrected <- bed_corrected %>% filter(has_motif == T)
-}
-
-bed_corrected <- bed_corrected %>% 
-  select(chr,start,end,UMI,orientation,strand,count,avg_qual,UMIs,UMIs_count,nUMIs,has_motif)
+  select(chr,start,end,orientation,strand,UMI,count,avg_qual,UMIs,UMIs_count,nUMIs)
 
 write.table(bed_corrected, file = output, sep="\t", quote = F, row.names = F)
 

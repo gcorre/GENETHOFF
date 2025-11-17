@@ -122,7 +122,7 @@
 
 \title{Off-targets analysis report}
 \author{Corre Guillaume}
-\date{2025-11-04}
+\date{2025-11-17}
 
 \begin{document}
 \maketitle
@@ -133,8 +133,7 @@
 }
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-Working directory :
-\textbf{/media/DATA/projects/GENETHOFF/test\_dataset}
+Working directory : \textbf{/media/Data/gcorre/GENETHOFF/test\_dataset}
 
 Pipeline version: \textbf{V1.0}
 
@@ -163,7 +162,7 @@ library & Cells & Genome & gRNA & gRNA sequence & PAM & Cas & type & orientation
 VEGFA\_s1\_K562\_neg &  &  &  &  &  &  &  & negative\\
 \cline{1-1}
 \cline{9-9}
-VEGFA\_s1\_K562\_pos & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash K562} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash GRCh38p14} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash VEGFA\_s1} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash GGGTGGGGGGAGTTTGCTCC} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash NGG} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash Cas} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash guideseq} & positive\\
+VEGFA\_s1\_K562\_pos & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash K562} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash GRCh38} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash VEGFA\_s1} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash GGGTGGGGGGAGTTTGCTCC} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash NGG} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash Cas} & \multirow{-2}{*}[0.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash guideseq} & positive\\
 \hline
 \end{tabular}}
 \end{table}
@@ -181,9 +180,9 @@ processing}\label{statistics-of-reads-processing}
 \hline
 library & Demultiplexed & ODN\_match & Filtered\\
 \hline
-VEGFA\_s1\_K562\_neg & 2,297,044 (100\%) & 2,116,070 (92.12\%) & 1,894,227 (82.46\%)\\
+VEGFA\_s1\_K562\_neg & 2,297,044 (100\%) & 2,098,470 (91.36\%) & 1,878,519 (81.78\%)\\
 \hline
-VEGFA\_s1\_K562\_pos & 1,175,378 (100\%) & 1,092,756 (92.97\%) & 1,077,959 (91.71\%)\\
+VEGFA\_s1\_K562\_pos & 1,175,378 (100\%) & 1,082,221 (92.07\%) & 1,067,562 (90.83\%)\\
 \hline
 \end{tabular}}
 \end{table}
@@ -226,15 +225,15 @@ library & Reads & UMIs & Insertions & Clusters & With gRNA match .. &  And .. & 
 \hline
  &  &  &  &  &  & .. 2 PCR orientations & 0\\
 \cline{7-8}
- &  &  &  &  &  & .. 2 ODN orientations & 8\\
+ &  &  &  &  &  & .. 2 ODN orientations & 10\\
 \cline{7-8}
-\multirow{-3}{*}{\raggedleft\arraybackslash VEGFA\_s1\_K562\_neg} & \multirow{-3}{*}{\raggedleft\arraybackslash 588,312} & \multirow{-3}{*}{\raggedleft\arraybackslash 26,074} & \multirow{-3}{*}{\raggedleft\arraybackslash 7,400} & \multirow{-3}{*}{\raggedleft\arraybackslash 7,322} & \multirow{-3}{*}{\centering\arraybackslash 132} & .. In Oncogene & 0\\
+\multirow{-3}{*}{\raggedleft\arraybackslash VEGFA\_s1\_K562\_neg} & \multirow{-3}{*}{\raggedleft\arraybackslash 862,185} & \multirow{-3}{*}{\raggedleft\arraybackslash 36,452} & \multirow{-3}{*}{\raggedleft\arraybackslash 10,269} & \multirow{-3}{*}{\raggedleft\arraybackslash 10,154} & \multirow{-3}{*}{\centering\arraybackslash 194} & .. In Oncogene & 0\\
 \cline{1-8}
  &  &  &  &  &  & .. 2 PCR orientations & 0\\
 \cline{7-8}
- &  &  &  &  &  & .. 2 ODN orientations & 3\\
+ &  &  &  &  &  & .. 2 ODN orientations & 4\\
 \cline{7-8}
-\multirow{-3}{*}{\raggedleft\arraybackslash VEGFA\_s1\_K562\_pos} & \multirow{-3}{*}{\raggedleft\arraybackslash 432,763} & \multirow{-3}{*}{\raggedleft\arraybackslash 18,879} & \multirow{-3}{*}{\raggedleft\arraybackslash 5,039} & \multirow{-3}{*}{\raggedleft\arraybackslash 5,018} & \multirow{-3}{*}{\centering\arraybackslash 119} & .. In Oncogene & 0\\
+\multirow{-3}{*}{\raggedleft\arraybackslash VEGFA\_s1\_K562\_pos} & \multirow{-3}{*}{\raggedleft\arraybackslash 513,417} & \multirow{-3}{*}{\raggedleft\arraybackslash 22,279} & \multirow{-3}{*}{\raggedleft\arraybackslash 5,960} & \multirow{-3}{*}{\raggedleft\arraybackslash 5,936} & \multirow{-3}{*}{\centering\arraybackslash 139} & .. In Oncogene & 0\\
 \hline
 \end{tabular}}
 \end{table}
@@ -291,9 +290,9 @@ necessarily be 0 ).
 \hline
 library & Position & Cut offset & Edits\_gRNA & Edits\_PAM & N\_UMI\_cluster & Relative\_abundance & Rank\\
 \hline
-VEGFA\_s1\_K562\_neg & chr6:43769560 & -1 & 0 & 0 & 369 & 31.98 & 1\\
+VEGFA\_s1\_K562\_neg & chr6:43769560 & -1 & 0 & 0 & 528 & 29.32 & 1\\
 \cline{1-8}
-VEGFA\_s1\_K562\_pos & chr6:43769560 & -2 & 0 & 0 & 115 & 19.39 & 1\\
+VEGFA\_s1\_K562\_pos & chr6:43769560 & -2 & 0 & 0 & 154 & 20.32 & 1\\
 \hline
 \end{tabular}}
 \end{table}
@@ -325,7 +324,7 @@ shallow curve suggests more even distribution among different clusters.
 
 \begin{figure}[H]
 
-{\centering \includegraphics[width=0.9\linewidth]{/media/DATA/projects/GENETHOFF/test_dataset/results/test_dataset_report_files/figure-latex/unnamed-chunk-6-1} 
+{\centering \includegraphics[width=0.9\linewidth]{/media/Data/gcorre/GENETHOFF/test_dataset/results/test_dataset_report_files/figure-latex/unnamed-chunk-6-1} 
 
 }
 
@@ -354,7 +353,7 @@ forward or reverse ODN orientation (blue and red bars respectively).
 
 \begin{figure}[H]
 
-{\centering \includegraphics[width=0.9\linewidth]{/media/DATA/projects/GENETHOFF/test_dataset/results/test_dataset_report_files/figure-latex/unnamed-chunk-7-1} 
+{\centering \includegraphics[width=0.9\linewidth]{/media/Data/gcorre/GENETHOFF/test_dataset/results/test_dataset_report_files/figure-latex/unnamed-chunk-7-1} 
 
 }
 
@@ -371,7 +370,7 @@ smaller or equal to \textbf{6} are considered.
 
 \begin{figure}[H]
 
-{\centering \includegraphics[width=0.9\linewidth]{/media/DATA/projects/GENETHOFF/test_dataset/results/test_dataset_report_files/figure-latex/unnamed-chunk-8-1} 
+{\centering \includegraphics[width=0.9\linewidth]{/media/Data/gcorre/GENETHOFF/test_dataset/results/test_dataset_report_files/figure-latex/unnamed-chunk-8-1} 
 
 }
 
@@ -385,7 +384,7 @@ equal to \textbf{6} are considered.
 
 \begin{figure}[H]
 
-{\centering \includegraphics[width=0.9\linewidth]{/media/DATA/projects/GENETHOFF/test_dataset/results/test_dataset_report_files/figure-latex/unnamed-chunk-9-1} 
+{\centering \includegraphics[width=0.9\linewidth]{/media/Data/gcorre/GENETHOFF/test_dataset/results/test_dataset_report_files/figure-latex/unnamed-chunk-9-1} 
 
 }
 
@@ -403,12 +402,12 @@ equal to \textbf{6} are considered.
 \FunctionTok{version}\KeywordTok{:}\AttributeTok{ }\StringTok{\textquotesingle{}V1.0\textquotesingle{}}
 
 \FunctionTok{clean\_intermediates\_files}\KeywordTok{:}\AttributeTok{ }\StringTok{\textquotesingle{}FALSE\textquotesingle{}}
-\FunctionTok{skip\_demultiplexing}\KeywordTok{:}\AttributeTok{ }\StringTok{\textquotesingle{}FALSE\textquotesingle{}}
+\FunctionTok{skip\_demultiplexing}\KeywordTok{:}\AttributeTok{ }\StringTok{\textquotesingle{}TRUE\textquotesingle{}}
 \FunctionTok{quantification}\KeywordTok{:}\AttributeTok{ }\StringTok{"umi"}\CommentTok{ \# use "umi" or "fragment" for the quantification (only if rescue\_R2 is \textquotesingle{}no")}
-\FunctionTok{rescue\_R2}\KeywordTok{:}\AttributeTok{ }\StringTok{"FALSE"}\CommentTok{     \# Rescue R2 reads if R1 is too short or the pair doesn\textquotesingle{}t align properly.}
+\FunctionTok{rescue\_R2}\KeywordTok{:}\AttributeTok{ }\StringTok{"TRUE"}\CommentTok{     \# Rescue R2 reads if R1 is too short or the pair doesn\textquotesingle{}t align properly.}
 
 \CommentTok{\#\# Library informations}
-\FunctionTok{sampleInfo\_path}\KeywordTok{:}\AttributeTok{ }\StringTok{"test\_datasheet.csv"}
+\FunctionTok{sampleInfo\_path}\KeywordTok{:}\AttributeTok{ }\StringTok{"sampleInfo.csv"}
 
 \FunctionTok{read\_path}\KeywordTok{:}\AttributeTok{  }\StringTok{""}
 \FunctionTok{R1}\KeywordTok{:}\AttributeTok{ }\StringTok{"Undetermined\_S0\_L001\_R1\_001.fastq.gz"}
@@ -420,11 +419,11 @@ equal to \textbf{6} are considered.
 \CommentTok{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}
 \CommentTok{\#\# path to references}
 \FunctionTok{genome}\KeywordTok{:}
-\AttributeTok{  }\FunctionTok{GRCh38p14}\KeywordTok{:}
-\AttributeTok{    }\FunctionTok{fasta}\KeywordTok{:}\AttributeTok{ }\StringTok{"/media/DATA/references/human/GRCh38p14/gencode/fasta/GRCh38.primary\_assembly.genome.chr.fa"}
-\AttributeTok{    }\FunctionTok{index}\KeywordTok{:}\AttributeTok{ }\StringTok{"/media/DATA/references/human/GRCh38p14/gencode/index/GRCh38.primary\_assembly.genome.chr"}\CommentTok{ \# path to index created during the run if not existing yet}
-\AttributeTok{    }\FunctionTok{annotation}\KeywordTok{:}\AttributeTok{ }\StringTok{"/media/DATA/references/human/GRCh38p14/gencode/annotations/gencode.v49.primary\_assembly.basic.annotation.gtf.gz"}
-\AttributeTok{    }\FunctionTok{oncogene\_list}\KeywordTok{:}\AttributeTok{ }\StringTok{"/media/DATA/projects/GENETHOFF/02{-}ressources/OncoList\_OncoKB\_GRCh38\_2025{-}07{-}04.tsv"}
+\AttributeTok{  }\FunctionTok{GRCh38}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{fasta}\KeywordTok{:}\AttributeTok{ }\StringTok{"/media/References/Human/ensembl/GRCh38/Sequences/Homo\_sapiens.GRCh38.dna.primary\_assembly\_ChrOnly.fa"}
+\AttributeTok{    }\FunctionTok{index}\KeywordTok{:}\AttributeTok{ }\StringTok{"/media/References/Human/ensembl/GRCh38/Indexes/Bowtie2/Homo\_sapiens.GRCh38.dna.primary\_assembly\_ChrOnly"}
+\AttributeTok{    }\FunctionTok{annotation}\KeywordTok{:}\AttributeTok{ }\StringTok{"/media/References/Human/ensembl/GRCh38/Annotations/Homo\_sapiens.GRCh38.113.chr.gtf.gz"}
+\AttributeTok{    }\FunctionTok{oncogene\_list}\KeywordTok{:}\AttributeTok{ }\StringTok{"/media/References/Human/ensembl/GRCh38/Annotations/OncoList\_OncoKB\_GRCh38\_2025{-}07{-}04.tsv"}
 \AttributeTok{  }\FunctionTok{mouse}\KeywordTok{:}
 \AttributeTok{    }\FunctionTok{fasta}\KeywordTok{:}\AttributeTok{ }\StringTok{""}
 \AttributeTok{    }\FunctionTok{index}\KeywordTok{:}\AttributeTok{ }\StringTok{""}
@@ -448,9 +447,10 @@ equal to \textbf{6} are considered.
 \FunctionTok{minMAPQ}\KeywordTok{:}\AttributeTok{ }\DecValTok{20}\CommentTok{                      \# Min MAPQ score to keep alignments }
 \FunctionTok{UMI\_hamming\_distance}\KeywordTok{:}\AttributeTok{ }\DecValTok{1}\CommentTok{         \# min distance to cluster UMI using network{-}based deduplication, use [0] to keep raw UMIs}
 \FunctionTok{UMI\_deduplication}\KeywordTok{:}\AttributeTok{ }\StringTok{"Adjacency"}\CommentTok{  \# method to correct UMI (cluster or Adjacency)}
-\FunctionTok{UMI\_pattern}\KeywordTok{:}\AttributeTok{ }\StringTok{"NNWNNWNN"}\AttributeTok{  }
+\FunctionTok{UMI\_pattern}\KeywordTok{:}\AttributeTok{ }\StringTok{"NNWNNWNN"}
 \FunctionTok{UMI\_filter}\KeywordTok{:}\AttributeTok{ }\StringTok{"TRUE"}\CommentTok{              \# If TRUE, remove UMIs that do no match the expected pattern [FALSE or TRUE]}
 \FunctionTok{UMI\_side}\KeywordTok{:}\AttributeTok{ }\StringTok{"3"}\CommentTok{                   \# position of the UMI in the I2 read sequence: 5 = UMI+BC, 3 = BC+UMI}
+\FunctionTok{UMI\_error\_rate}\KeywordTok{:}\AttributeTok{ }\DecValTok{0}
 \CommentTok{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}
 
 
@@ -508,9 +508,7 @@ equal to \textbf{6} are considered.
 \AttributeTok{    }\FunctionTok{R1\_trailing}\KeywordTok{:}\AttributeTok{ }\StringTok{"TCGCGTATACCGTTATTAACATATGACAACTCAA"}
 \AttributeTok{    }\FunctionTok{R2\_leading}\KeywordTok{:}\AttributeTok{ }\StringTok{"TTGAGTTGTCATATGTTAATAACGGTATACGCGA"}
 \AttributeTok{    }\FunctionTok{R2\_trailing}\KeywordTok{:}\AttributeTok{ }\StringTok{"AGATCGGAAGAGCGTCGTGT"}
-\AttributeTok{    }
-\AttributeTok{    }
-\AttributeTok{    }
+
 \FunctionTok{olitagseq}\KeywordTok{:}
 \AttributeTok{  }\FunctionTok{positive}\KeywordTok{:}
 \AttributeTok{    }\FunctionTok{R1\_trailing}\KeywordTok{:}\AttributeTok{ }\StringTok{"GGGGTTTAATTGAGTTGTCATATGTT"}
@@ -537,11 +535,11 @@ equal to \textbf{6} are considered.
 \section{R session informations}\label{r-session-informations}
 
 R version 4.4.3 (2025-02-28) Platform: x86\_64-conda-linux-gnu Running
-under: Debian GNU/Linux 11 (bullseye)
+under: Debian GNU/Linux 12 (bookworm)
 
 Matrix products: default BLAS/LAPACK:
-/home/gcorre/miniconda3/envs/GENETHOFF/lib/libopenblasp-r0.3.30.so;
-LAPACK version 3.12.0
+/opt/miniconda/envs/GENETHOFF/lib/libopenblasp-r0.3.30.so; LAPACK
+version 3.12.0
 
 locale: {[}1{]} LC\_CTYPE=fr\_FR.UTF-8 LC\_NUMERIC=C\\
 {[}3{]} LC\_TIME=fr\_FR.UTF-8 LC\_COLLATE=fr\_FR.UTF-8\\
@@ -562,7 +560,7 @@ dplyr\_1.1.4 purrr\_1.1.0\\
 {[}13{]} tidyverse\_2.0.0 rmdformats\_1.0.4
 
 loaded via a namespace (and not attached): {[}1{]} generics\_0.1.4
-xml2\_1.4.0 stringi\_1.8.7 hms\_1.1.4\\
+xml2\_1.4.0 stringi\_1.8.7 hms\_1.1.3\\
 {[}5{]} digest\_0.6.37 magrittr\_2.0.4 evaluate\_1.0.5 grid\_4.4.3\\
 {[}9{]} timechange\_0.3.0 RColorBrewer\_1.1-3 bookdown\_0.45
 fastmap\_1.2.0\\

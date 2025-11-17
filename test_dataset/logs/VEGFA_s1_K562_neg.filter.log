@@ -1,18 +1,18 @@
-This is cutadapt 5.0 with Python 3.12.12
+This is cutadapt 5.0 with Python 3.12.11
 Command line parameters: -j 6 --pair-filter=any --minimum-length 25 --too-short-output 02-filtering/VEGFA_s1_K562_neg_R1.UMI.ODN.trimmed.tooshort.fastq.gz --too-short-paired-output 02-filtering/VEGFA_s1_K562_neg_R2.UMI.ODN.trimmed.tooshort.fastq.gz --output 02-filtering/VEGFA_s1_K562_neg_R1.UMI.ODN.trimmed.filtered.fastq.gz --paired-output 02-filtering/VEGFA_s1_K562_neg_R2.UMI.ODN.trimmed.filtered.fastq.gz 01-trimming/VEGFA_s1_K562_neg_R1.ODN.UMI.trimmed.fastq.gz 01-trimming/VEGFA_s1_K562_neg_R2.ODN.UMI.trimmed.fastq.gz
 Processing paired-end reads on 6 cores ...
 
 === Summary ===
 
-Total read pairs processed:          2,116,070
+Total read pairs processed:          2,098,470
 
 == Read fate breakdown ==
-Pairs that were too short:             221,843 (10.5%)
-Pairs written (passing filters):     1,894,227 (89.5%)
+Pairs that were too short:             219,951 (10.5%)
+Pairs written (passing filters):     1,878,519 (89.5%)
 
-Total basepairs processed:   430,125,501 bp
-  Read 1:   228,634,742 bp
-  Read 2:   201,490,759 bp
-Total written (filtered):    427,603,210 bp (99.4%)
-  Read 1:   227,657,956 bp
-  Read 2:   199,945,254 bp
+Total basepairs processed:   426,567,974 bp
+  Read 1:   226,742,676 bp
+  Read 2:   199,825,298 bp
+Total written (filtered):    424,061,551 bp (99.4%)
+  Read 1:   225,772,236 bp
+  Read 2:   198,289,315 bp
