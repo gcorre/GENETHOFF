@@ -33,6 +33,11 @@ properties:
     description: name of gRNA
   gRNA_sequence:
     type: string
+  Include_in_run:
+    type: boolean
+    default: true
+    enum: [true,false,TRUE,FALSE,True,False]
+    description: whether to include library in the run analysis
 
 
 required:
@@ -46,3 +51,4 @@ required:
   - gRNA_name
   - gRNA_sequence
   - PAM_side
+  - Include_in_run

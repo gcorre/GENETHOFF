@@ -106,7 +106,7 @@ Summary of the alignment step, calling step and clustering of cutting sites incl
 
 alignment_table <- lapply(tables_off,data.frame) %>%   
   bind_rows(.id="library")  
-names(alignment_table) <- c('library','link') 
+names(alignment_table) <- c('library','link')
 
 kbl(stats_summary %>%
       arrange(library) %>%
