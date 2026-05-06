@@ -1,7 +1,17 @@
+## GENETH'OFF 2026
 ## retreive the example dataset from SRA : 
 
-# install sra-tools
 
+#############################################################
+# install sra-tools
+#############################################################
+
+
+
+
+#############################################################
+# Collect datasets
+#############################################################
 cd GENETHOFF/test_dataset
 
 prefetch SRR35635851
@@ -11,7 +21,11 @@ fasterq-dump --split-files --use-name --include-technical --seq-defline '@$sn $s
 pigz SRR35635851*fastq
 
 
+
+
+#############################################################
 # rename files to fit with pipeline requirements (R1, R2, I1,I2)
+#############################################################
 
 mv SRR35635851_1.fastq.gz Undetermined_S0_L001_I1_001.fastq.gz
 mv SRR35635851_2.fastq.gz Undetermined_S0_L001_I2_001.fastq.gz

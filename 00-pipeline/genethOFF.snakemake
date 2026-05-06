@@ -75,8 +75,12 @@ else:
   
   #check the validity of the sample Data Sheet (Path is relative to pipeline file, not current folder)
   validate(samplesTable, "samples.schema.yaml")
+  
+###############################################################
+## Exclude libraries with "exclude" flag
+###############################################################
 
-
+  samplesTable = samplesTable[samplesTable["Include_in_run"] == True]
 
 
 ###############################################################
@@ -302,7 +306,7 @@ else:
 
 rule target:
     input:
-     ["results/{sample}_summary.xlsx".format(sample=sample) for sample in samples_unique],
+     ["05-Report/{sample}_summary_grna.csv".format(sample=sample) for sample in samples_unique],
      "results/"+os.path.basename(os.getcwd())+"_report.html"
      
 
@@ -384,14 +388,14 @@ rule demultiplex_samples:
     conda: "GENETHOFF"
     log: R1= "logs/demultiplexing_i1_R1.log"
     threads: 6
-    params: UMI_side=config["UMI_side"] 
+    params: UMI_side=config["UMI_side"], demux_error=config["demux_error_rate"]
     shell: """
         if [ {params.UMI_side} = "3" ]; then
-          cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_I3.fastq.gz -p 00-demultiplexing/{{name}}_R1.fastq.gz {input.I3} {input.R1} > {log.R1}
-          cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_I3.fastq.gz -p 00-demultiplexing/{{name}}_R2.fastq.gz {input.I3} {input.R2} > /dev/null
+          cutadapt -g ^file:{input.barcodes} -j {threads} -e {params.demux_error} --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_I3.fastq.gz -p 00-demultiplexing/{{name}}_R1.fastq.gz {input.I3} {input.R1} > {log.R1}
+          cutadapt -g ^file:{input.barcodes} -j {threads} -e {params.demux_error} --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_I3.fastq.gz -p 00-demultiplexing/{{name}}_R2.fastq.gz {input.I3} {input.R2} > /dev/null
         else
-          cutadapt -a file$:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_I3.fastq.gz -p 00-demultiplexing/{{name}}_R1.fastq.gz {input.I3} {input.R1} > {log.R1}
-          cutadapt -a file$:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_I3.fastq.gz -p 00-demultiplexing/{{name}}_R2.fastq.gz {input.I3} {input.R2} > /dev/null
+          cutadapt -a file$:{input.barcodes} -j {threads} -e {params.demux_error} --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_I3.fastq.gz -p 00-demultiplexing/{{name}}_R1.fastq.gz {input.I3} {input.R1} > {log.R1}
+          cutadapt -a file$:{input.barcodes} -j {threads} -e {params.demux_error} --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_I3.fastq.gz -p 00-demultiplexing/{{name}}_R2.fastq.gz {input.I3} {input.R2} > /dev/null
         fi
         """
 
@@ -450,11 +454,15 @@ rule add_UMI:
         UMI_length=$(expr length {params.UMI})
         
         if [ "{params.UMI_side}" = "5" ]; then
-          cutadapt -j {threads} -g "^{params.UMI}" -e {params.UMI_error}  --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
-          cutadapt -j {threads} -g "^{params.UMI}" -e {params.UMI_error}  --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
+        
+          cutadapt -j {threads} -g "^{params.UMI}" -O $UMI_length -e {params.UMI_error} --no-indels --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
+          cutadapt -j {threads} -g "^{params.UMI}" -O $UMI_length -e {params.UMI_error} --no-indels --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
+          
         else
-          cutadapt -j {threads} -a "{params.UMI}$" -e {params.UMI_error}  --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
-          cutadapt -j {threads} -a "{params.UMI}$" -e {params.UMI_error}  --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
+        
+          cutadapt -j {threads} -a "{params.UMI}$" -O $UMI_length -e {params.UMI_error} --no-indels --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
+          cutadapt -j {threads} -a "{params.UMI}$" -O $UMI_length -e {params.UMI_error} --no-indels --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
+          
         fi 
         """
 
@@ -732,6 +740,20 @@ rule callIS_R2rescued:
 
 #######################
 
+# rule correct_UMI:
+#     input: 
+#       bed=rules.call_IS.output.umi, 
+#       bed_rescued=lambda wildcards: f"04-IScalling/{wildcards.sample}_rescueR2.bed" if config["rescue_R2"].lower()=="true" and config["quantification"].lower()=="umi" else rules.call_IS.output.umi 
+#     output:  
+#       "04-IScalling/{sample}.reads_per_UMI_per_IS_corrected.bed"
+#     conda: "GENETHOFF"
+#     threads: 2
+#     params: hamming=config["UMI_hamming_distance"], method = config["UMI_deduplication"], rescueR2=config["rescue_R2"].upper()
+#     shell: """
+#         Rscript {workflow.basedir}/correct_umi.R {input.bed} {params.hamming} {params.method} {output} {params.rescueR2}
+#         """
+
+
 rule correct_UMI:
     input: 
       bed=rules.call_IS.output.umi, 
@@ -742,8 +764,10 @@ rule correct_UMI:
     threads: 2
     params: hamming=config["UMI_hamming_distance"], method = config["UMI_deduplication"], rescueR2=config["rescue_R2"].upper()
     shell: """
-        Rscript {workflow.basedir}/correct_umi.R {input.bed} {params.hamming} {params.method} {output} {params.rescueR2}
+        python {workflow.basedir}/correct_umi.py -i {input.bed} -t {params.hamming} --method {params.method} -o {output} -r {params.rescueR2}
         """
+
+
 
 
 rule Collapse_UMI_IS:
@@ -837,46 +861,60 @@ rule predict_offtarget_SWOffinder:
         if [ {params.PAM_side} = "5" ];
         then
             sequence={params.PAM}{params.gRNA}
-            java -cp {params.SWoffFinder}/bin SmithWatermanOffTarget.SmithWatermanOffTargetSearchAlign {params.genome} $sequence 06-offPredict/{wildcards.gen}_{wildcards.grna}_{wildcards.pam}_{wildcards.side} {params.maxE} {params.maxM} {params.maxMB} $(echo $bulge_size) {threads} TRUE {params.window_size} {params.PAM} TRUE
+            java -cp {params.SWoffFinder}/bin SmithWatermanOffTarget.SmithWatermanOffTargetSearchAlign --genome {params.genome} --sgrnas $sequence --output 06-offPredict/{wildcards.gen}_{wildcards.grna}_{wildcards.pam}_{wildcards.side} --maxE {params.maxE} --maxM {params.maxM} --maxMB {params.maxMB} --maxB $(echo $bulge_size) --threads {threads} --allowPamEdits TRUE --windowSize {params.window_size} --pam {params.PAM} --bestWindow TRUE
         else
             sequence={params.gRNA}{params.PAM}
-            java -cp {params.SWoffFinder}/bin SmithWatermanOffTarget.SmithWatermanOffTargetSearchAlign {params.genome} $sequence 06-offPredict/{wildcards.gen}_{wildcards.grna}_{wildcards.pam}_{wildcards.side} {params.maxE} {params.maxM} {params.maxMB} $(echo $bulge_size) {threads} TRUE {params.window_size} {params.PAM} TRUE
+            java -cp {params.SWoffFinder}/bin SmithWatermanOffTarget.SmithWatermanOffTargetSearchAlign --genome {params.genome} --sgrnas $sequence --output 06-offPredict/{wildcards.gen}_{wildcards.grna}_{wildcards.pam}_{wildcards.side} --maxE {params.maxE} --maxM {params.maxM} --maxMB {params.maxMB} --maxB $(echo $bulge_size) --threads {threads} --allowPamEdits TRUE --windowSize {params.window_size} --pam {params.PAM} --bestWindow TRUE
         fi
         
         """
 
-rule report_data:
-    input: fasta=rules.get_fasta_around_is.output.fa, cluster=rules.get_fasta_around_is.output.cluster, bed=rules.Collapse_UMI_IS.output.collapse, statfq=rules.get_stats_fq.output,statal=rules.alignOnGenome.log
-    output: "05-Report/{sample}.rdata"
-    conda: "GENETHOFF"
-    threads: 4
-    params: gRNA_seq=lambda wildcards:samples["gRNA_sequence"][wildcards.sample], 
+
+rule annotate_clusters:
+  input: rules.get_fasta_around_is.output.cluster, 
+   rules.Collapse_UMI_IS.output.collapse, 
+   annot=lambda wildcards: workflow.basedir+"/../02-ressources/"+samples["Genome"][wildcards.sample]+".rds", 
+   predictions=expand("06-offPredict/{gen}_{grna}_{pam}_{side}.csv", zip, grna=gRNAs, gen=genomes,pam=PAMs,side=sides)
+  output: "05-Report/{sample}_summary.csv"
+  threads: 1
+  conda: "GENETHOFF"
+  params:  
+    oncoList=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["oncogene_list"],
+    gRNA_seq=lambda wildcards:samples["gRNA_sequence"][wildcards.sample], 
+    PAM=lambda wildcards:samples["PAM_sequence"][wildcards.sample],
+    pam_side=lambda wildcards:samples["PAM_side"][wildcards.sample],
+    genome=lambda wildcards:samples["Genome"][wildcards.sample],
+    min_predicted_distance=config["min_predicted_distance"],
+   
+  shell: """
+    Rscript {workflow.basedir}/annotate_clusters.R {input[0]} {input[1]} {input[2]} {params.oncoList} 06-offPredict/{params.genome}_{params.gRNA_seq}_{params.PAM}_{params.pam_side}.csv {params.min_predicted_distance} {output}
+  
+  """
+
+
+rule match_gRNA_clusters:
+  input: rules.get_fasta_around_is.output.fa, rules.annotate_clusters.output 
+  output: "05-Report/{sample}_summary_grna.csv"
+  threads: 1
+  conda: "GENETHOFF"
+  params: gRNA_seq=lambda wildcards:samples["gRNA_sequence"][wildcards.sample], 
      gRNA_name=lambda wildcards:samples["gRNA_name"][wildcards.sample],
      PAM=lambda wildcards:samples["PAM_sequence"][wildcards.sample],
      offset=lambda wildcards:samples["Cut_Offset"][wildcards.sample],
      max_edits=config["max_edits_crRNA"],
      bulges=config["tolerate_bulges"],
      pam_side=lambda wildcards:samples["PAM_side"][wildcards.sample]
-    shell : """
-        Rscript {workflow.basedir}/multiple_alignments.R {input.fasta} {input.cluster} {input.bed} {params.gRNA_seq} {params.gRNA_name}  {params.PAM}  {params.offset} {params.max_edits} {params.bulges} {params.pam_side} {output}
-        """        
-        
-
-rule annotate_sites:
-    input: rdata=rules.report_data.output, annot=[workflow.basedir+"/../02-ressources/{genome}.rds".format(genome=genome) for genome in genomes_unique]
-    output: "results/{sample}_summary.xlsx"
-    conda: "GENETHOFF"
-    threads: 4
-    params: species=lambda wildcards: samples["Genome"][wildcards.sample], oncoList=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["oncogene_list"]
-    shell: """
-        Rscript {workflow.basedir}/annotate_cuting_sites.R {input.annot} {input.rdata} {output} {params.oncoList}
-        """
+  shell: """
+    Rscript {workflow.basedir}/Find_gRNA_in_clusters.R {input[0]} {input[1]} {params.gRNA_seq} {params.gRNA_name}  {params.PAM}  {params.offset} {params.max_edits} {params.bulges} {params.pam_side} {output}
+  
+  """
 
 
-rule report:
-    input: summaries= ["results/{sample}_summary.xlsx".format(sample=sample) for sample in samples_unique],
-     predictions=expand("06-offPredict/{gen}_{grna}_{pam}_{side}.csv", zip, grna=gRNAs, gen=genomes,pam=PAMs,side=sides)
-    output: report_rdata= "results/report.rdata"
+
+rule prepare_tables:
+    input: summaries= ["05-Report/{sample}_summary_grna.csv".format(sample=sample) for sample in samples_unique], 
+     stats= ["05-Report/{sample}.stat".format(sample=sample) for sample in samples_unique]
+    output: report_rdata= "results/report.rdata", libraries_xlsx="results/"+os.path.basename(os.getcwd())+".xlsx"
     conda: "GENETHOFF"
     threads: 1
     params: sampleInfo=config["sampleInfo_path"], 
@@ -886,11 +924,14 @@ rule report:
      max_clusters=config["max_clusters"]
     shell: """
         mkdir -p results/report-files/;
-        Rscript {workflow.basedir}/generate_tables.r "{input.summaries}" {params.sampleInfo} {params.config} "{input.predictions}" {params.max_clusters} {params.minUMI_alignments_figure} {params.min_predicted_distance}
+        
+        Rscript {workflow.basedir}/prepare_tables.r "{input.summaries}" {params.sampleInfo} {params.config}  {params.minUMI_alignments_figure} {params.max_clusters} {output.libraries_xlsx}
+        
         """
-      
+
+
 rule make_report:
-    input:  rules.report.output.report_rdata
+    input:  rules.prepare_tables.output.report_rdata
     output: report_html="results/"+os.path.basename(os.getcwd())+"_report.html",report_pdf="results/"+os.path.basename(os.getcwd())+"_report.pdf"
     conda: "GENETHOFF"
     params: config_path=config_file_path

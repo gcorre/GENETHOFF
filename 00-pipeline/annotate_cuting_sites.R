@@ -29,10 +29,10 @@ onco_list <- args[4]
 
 ###########################################################
 ## debug
- # file = "05-Report/EBS_hDMD.rdata"
- # annotation <- "GRCh38"
- # onco_list <- "../02-ressources/OncoList_OncoKB_GRCh38_2025-07-04.tsv"
- # output <- "results/EBS_hDMD_summary.xlsx"
+ #file = "05-Report/GUIDEseq_SpRY_gRNA_21_HBG.rdata"
+ # annotation <- "T2T_CHM13V2.0.rds"
+ # onco_list <- "None"
+ # output <- "results/GUIDEseq_SpRY_gRNA_21_HBG.xlsx"
 ###########################################################
 
 # load sample rdata file
@@ -84,7 +84,7 @@ if(exists("clusters_grna_match") && nrow(clusters_grna_match)>0){
   
   # human list examples : https://bioinfo.uth.edu/TSGene/download.cgi & https://bioinfo-minzhao.org/ongene/download.html 
   
-  if(onco_list!=""){
+  if(onco_list!="None"){
     
     onco_list_df <- read.delim(onco_list,sep=";") 
     
@@ -108,7 +108,8 @@ if(exists("clusters_grna_match") && nrow(clusters_grna_match)>0){
     }
   } else {
     warning("Oncogene list was empty. Annotating with NAs")
-    results_granges_df <- results_granges_df %>% mutate(Onco_annotation = "")
+    results_granges_df <- results_granges_df %>% 
+      mutate(Onco_annotation = NA)
   }
   
 

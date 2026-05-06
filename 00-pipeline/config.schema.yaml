@@ -19,7 +19,7 @@ properties:
     enum: ["true","false","TRUE","FALSE"]
     type: string
   UMI_deduplication:
-    enum: ["Adjacency","cluster"]
+    enum: ["adjacency","cluster","directional","unique","percentile"]
     type: string
   UMI_side:
     enum: ["5","3"]
