@@ -33,10 +33,13 @@ properties:
     description: name of gRNA
   gRNA_sequence:
     type: string
+  UMI_pattern:
+    type: string
+    description: Pattern of the UMI in IUPAC symbols
   Include_in_run:
-    type: boolean
-    default: true
-    enum: [true,false,TRUE,FALSE,True,False]
+    type: string
+    default: "yes"
+    enum: ["yes","no","YES","NO"]
     description: whether to include library in the run analysis
 
 
@@ -52,3 +55,4 @@ required:
   - gRNA_sequence
   - PAM_side
   - Include_in_run
+  - UMI_pattern

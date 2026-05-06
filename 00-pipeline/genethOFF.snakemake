@@ -80,7 +80,7 @@ else:
 ## Exclude libraries with "exclude" flag
 ###############################################################
 
-  samplesTable = samplesTable[samplesTable["Include_in_run"] == True]
+  samplesTable = samplesTable[samplesTable["Include_in_run"].str.lower() == "yes"]
 
 
 ###############################################################
@@ -115,7 +115,7 @@ if config["skip_demultiplexing"].lower() == "true":
 
 ###############################################################
 
-columns_to_check = ['sampleName','Genome','gRNA_name', 'gRNA_sequence','PAM_sequence','PAM_side','Cas','type',"Cut_Offset"]
+columns_to_check = ['sampleName','Genome','gRNA_name', 'gRNA_sequence','PAM_sequence','PAM_side','UMI_pattern','type',"Cut_Offset"]
 
 identical_values=samplesTable.groupby(samplesTable.index).apply(lambda x: x[columns_to_check].nunique().eq(1).all())
     
@@ -123,7 +123,7 @@ if identical_values.all():
     samples = samplesTable[columns_to_check].drop_duplicates()
     print("#### Samples that will be processed : \n\n",samples.to_markdown(index=False),"\n")
     
-    my_list=samples[["Genome","gRNA_sequence","PAM_sequence","PAM_side"]].drop_duplicates()
+    my_list=samples[["Genome","gRNA_sequence","PAM_sequence","PAM_side","UMI_pattern"]].drop_duplicates()
     
     
     samples_unique=list(set(samples["sampleName"]))
@@ -142,7 +142,7 @@ if identical_values.all():
       genomes_unique=list(set(genomes))
  
 else:
-    print(f"{RED}!! Samples with identical 'sampleName' value must share the same features : gRNA_name, gRNA_sequence, PAM_sequence,PAM_side, Genome, Cas\n---> Please correct metadata or use different samples name{RESET}")
+    print(f"{RED}!! Samples with identical 'sampleName' value must share the same features : gRNA_name, gRNA_sequence, PAM_sequence,PAM_side, Genome, UMI_pattern\n---> Please correct metadata or use different samples name{RESET}")
     print(samplesTable[columns_to_check])
     sys.exit(1)
 
@@ -447,7 +447,7 @@ rule add_UMI:
   log: R1="logs/{sample}_R1.UMI.log", R2="logs/{sample}_R2.UMI.log"    
   conda: "GENETHOFF"
   params:
-    UMI=config["UMI_pattern"], ## UMI pattern
+    UMI=lambda wildcards:samplesTable["UMI_pattern"][wildcards.sample],
     UMI_side=config["UMI_side"], ## either 5 (left) or 3 (right)
     UMI_error=config["UMI_error_rate"]
   shell: """
@@ -658,14 +658,14 @@ rule call_IS:
       umi="04-IScalling/{sample}.reads_per_UMI_per_IS.bed"
     threads: 1
     conda: "GENETHOFF"
-    params: UMI=config["UMI_pattern"], quantif=config["quantification"].lower()
+    params: quantif=config["quantification"].lower()
     shell: """
         bedtools bamtobed -bedpe -mate1 -i {input} > {output.tmp}
         if [ {params.quantif} = "umi" ] ; 
         
         
         then 
-            UMI_length=$(expr length {params.UMI})
+
             # read R2 contains the genome/ODN junction (use $10 of PE bed = mate 2)
         
             ##################################################################
@@ -721,11 +721,8 @@ rule callIS_R2rescued:
     tmp=temp("04-IScalling/{sample}_rescueR2.bed")
   threads: 1
   conda: "GENETHOFF"
-  params: UMI=config["UMI_pattern"]
   shell: """
   
-      UMI_length=$(expr length {params.UMI})
-
       bedtools bamtobed -i {input} > {output.tmp}
       
       # read R2 contains the genome/ODN junction
