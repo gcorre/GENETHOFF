@@ -10,14 +10,20 @@ This repository consists of a snakemake workflow dedicated to the analysis of li
 The key features of the pipeline are :
 
 -   High versatility with analysis of multiplexed libraries including samples from different organisms, gRNA and PAM sequences, PCR orientations ... in a single run.
+  
+-   Quantification based on UMI or fragment length.
+  
+-   Possibility to analyze already demultiplexed libraries with UMI extraction from read header if necessary.
+  
+-   Possibility to merge samples at demultiplexing step (replicates, PCR orientation ...).
 
 -   Consideration of bulges and mismatches between the gRNA and gDNA alignments.
 
 -   Consideration of multi-hit reads (assignment to random position among best hits).
 
--   Prediction of Off-target sites using SWOFFinder
+-   Prediction of Off-target sites using SWOFFinder.
 
--   Annotation to gene and oncogene (user defined lists)
+-   Annotation to gene and oncogene (user defined lists).
 
 -   Reporting with QC and OT quantification.
 
