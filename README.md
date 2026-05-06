@@ -2,6 +2,9 @@
 
 ------------------------------------------------------------------------
 
+<img width="1033" height="273" alt="image" src="https://github.com/user-attachments/assets/9fd137ce-d3c0-4bc8-a78c-dd80fa46b896" />
+
+------------------------------------------------------------------------
 This repository consists of a snakemake workflow dedicated to the analysis of libraries derived from the GUIDE-Seq protocol, including iGUIDE-Seq, GUIDE-Seq2, Tag-Seq, OliTag-Seq or any other libraries based on the original protocol by Tsai et al. 2015.
 
 The key features of the pipeline are :
