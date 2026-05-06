@@ -33,7 +33,7 @@ This work is distributed under an **Academic Non-Commercial License**. Commercia
 
 If you use this pipeline in your research, please cite:
 
-> Repository : <https://github.com/gcorre/GNT_GuideSeq>
+> Repository : <https://github.com/gcorre/GENETHOFF>
 >
 > DOI: 10.5281/zenodo.16759028
 >
