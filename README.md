@@ -38,4 +38,4 @@ If you use this pipeline in your research, please cite:
 
 # Documentation
 
-For installation and usage instructions, please read the complete [documentation](https://raw.githack.com/gcorre/GENETHOFF/refs/heads/master/docs/documentation.html).
+For installation and usage instructions, please read the complete [documentation](https://github.com/gcorre/GENETHOFF/wiki).
