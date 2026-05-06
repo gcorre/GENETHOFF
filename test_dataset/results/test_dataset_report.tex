@@ -122,7 +122,7 @@
 
 \title{Off-targets analysis report}
 \author{Corre Guillaume}
-\date{2025-11-17}
+\date{2026-05-06}
 
 \begin{document}
 \maketitle
@@ -227,13 +227,13 @@ library & Reads & UMIs & Insertions & Clusters & With gRNA match .. &  And .. & 
 \cline{7-8}
  &  &  &  &  &  & .. 2 ODN orientations & 10\\
 \cline{7-8}
-\multirow{-3}{*}{\raggedleft\arraybackslash VEGFA\_s1\_K562\_neg} & \multirow{-3}{*}{\raggedleft\arraybackslash 862,185} & \multirow{-3}{*}{\raggedleft\arraybackslash 36,452} & \multirow{-3}{*}{\raggedleft\arraybackslash 10,269} & \multirow{-3}{*}{\raggedleft\arraybackslash 10,154} & \multirow{-3}{*}{\centering\arraybackslash 194} & .. In Oncogene & 0\\
+\multirow{-3}{*}{\raggedleft\arraybackslash VEGFA\_s1\_K562\_neg} & \multirow{-3}{*}{\raggedleft\arraybackslash 868,996} & \multirow{-3}{*}{\raggedleft\arraybackslash 37,048} & \multirow{-3}{*}{\raggedleft\arraybackslash 10,323} & \multirow{-3}{*}{\raggedleft\arraybackslash 10,208} & \multirow{-3}{*}{\centering\arraybackslash 197} & .. In Oncogene & 0\\
 \cline{1-8}
  &  &  &  &  &  & .. 2 PCR orientations & 0\\
 \cline{7-8}
  &  &  &  &  &  & .. 2 ODN orientations & 4\\
 \cline{7-8}
-\multirow{-3}{*}{\raggedleft\arraybackslash VEGFA\_s1\_K562\_pos} & \multirow{-3}{*}{\raggedleft\arraybackslash 513,417} & \multirow{-3}{*}{\raggedleft\arraybackslash 22,279} & \multirow{-3}{*}{\raggedleft\arraybackslash 5,960} & \multirow{-3}{*}{\raggedleft\arraybackslash 5,936} & \multirow{-3}{*}{\centering\arraybackslash 139} & .. In Oncogene & 0\\
+\multirow{-3}{*}{\raggedleft\arraybackslash VEGFA\_s1\_K562\_pos} & \multirow{-3}{*}{\raggedleft\arraybackslash 514,842} & \multirow{-3}{*}{\raggedleft\arraybackslash 22,526} & \multirow{-3}{*}{\raggedleft\arraybackslash 5,980} & \multirow{-3}{*}{\raggedleft\arraybackslash 5,956} & \multirow{-3}{*}{\centering\arraybackslash 139} & .. In Oncogene & 0\\
 \hline
 \end{tabular}}
 \end{table}
@@ -246,8 +246,8 @@ Cut sites were identified from the alignment start position of R2 reads.
   Reads were aggregated if they share the exact same start position and
   the same UMI sequence.
 \item
-  UMI were corrected using the \textbf{Adjacency} method with a Hamming
-  distance tolerance of \textbf{1}.
+  UMI were corrected using the \textbf{directional} method with a
+  Hamming distance tolerance of \textbf{1}.
 \item
   Positions/UMI with more than \textbf{3} reads were considered for next
   step.
@@ -286,13 +286,13 @@ necessarily be 0 ).
 \centering
 \resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
 \fontsize{8}{10}\selectfont
-\begin{tabular}[t]{l|l|r|r|l|r|r|r}
+\begin{tabular}[t]{l|l|r|r|r|r|r|r}
 \hline
 library & Position & Cut offset & Edits\_gRNA & Edits\_PAM & N\_UMI\_cluster & Relative\_abundance & Rank\\
 \hline
-VEGFA\_s1\_K562\_neg & chr6:43769560 & -1 & 0 & 0 & 528 & 29.32 & 1\\
+VEGFA\_s1\_K562\_neg & chr6:43769560 & -1 & 0 & 0 & 454 & 25.78 & 1\\
 \cline{1-8}
-VEGFA\_s1\_K562\_pos & chr6:43769560 & -2 & 0 & 0 & 154 & 20.32 & 1\\
+VEGFA\_s1\_K562\_pos & chr6:43769560 & -2 & 0 & 0 & 157 & 20.58 & 1\\
 \hline
 \end{tabular}}
 \end{table}
@@ -402,7 +402,7 @@ equal to \textbf{6} are considered.
 \FunctionTok{version}\KeywordTok{:}\AttributeTok{ }\StringTok{\textquotesingle{}V1.0\textquotesingle{}}
 
 \FunctionTok{clean\_intermediates\_files}\KeywordTok{:}\AttributeTok{ }\StringTok{\textquotesingle{}FALSE\textquotesingle{}}
-\FunctionTok{skip\_demultiplexing}\KeywordTok{:}\AttributeTok{ }\StringTok{\textquotesingle{}TRUE\textquotesingle{}}
+\FunctionTok{skip\_demultiplexing}\KeywordTok{:}\AttributeTok{ }\StringTok{\textquotesingle{}FALSE\textquotesingle{}}
 \FunctionTok{quantification}\KeywordTok{:}\AttributeTok{ }\StringTok{"umi"}\CommentTok{ \# use "umi" or "fragment" for the quantification (only if rescue\_R2 is \textquotesingle{}no")}
 \FunctionTok{rescue\_R2}\KeywordTok{:}\AttributeTok{ }\StringTok{"TRUE"}\CommentTok{     \# Rescue R2 reads if R1 is too short or the pair doesn\textquotesingle{}t align properly.}
 
@@ -431,6 +431,7 @@ equal to \textbf{6} are considered.
 \CommentTok{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}
 
 \CommentTok{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}
+\FunctionTok{demux\_error\_rate}\KeywordTok{:}\AttributeTok{ }\FloatTok{0.1}\CommentTok{  \# max error rate for barecode during demultiplexing (this is applied to I1 and I2 concatenated)}
 \FunctionTok{minLength}\KeywordTok{:}\AttributeTok{ }\DecValTok{25}\CommentTok{ \#\# Minimal read length after trimming, before alignment}
 \CommentTok{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}
 
@@ -446,11 +447,10 @@ equal to \textbf{6} are considered.
 \CommentTok{\# post alignment}
 \FunctionTok{minMAPQ}\KeywordTok{:}\AttributeTok{ }\DecValTok{20}\CommentTok{                      \# Min MAPQ score to keep alignments }
 \FunctionTok{UMI\_hamming\_distance}\KeywordTok{:}\AttributeTok{ }\DecValTok{1}\CommentTok{         \# min distance to cluster UMI using network{-}based deduplication, use [0] to keep raw UMIs}
-\FunctionTok{UMI\_deduplication}\KeywordTok{:}\AttributeTok{ }\StringTok{"Adjacency"}\CommentTok{  \# method to correct UMI (cluster or Adjacency)}
+\FunctionTok{UMI\_deduplication}\KeywordTok{:}\AttributeTok{ }\StringTok{"directional"}\CommentTok{  \# method to correct UMI (cluster or Adjacency)}
 \FunctionTok{UMI\_pattern}\KeywordTok{:}\AttributeTok{ }\StringTok{"NNWNNWNN"}
-\FunctionTok{UMI\_filter}\KeywordTok{:}\AttributeTok{ }\StringTok{"TRUE"}\CommentTok{              \# If TRUE, remove UMIs that do no match the expected pattern [FALSE or TRUE]}
 \FunctionTok{UMI\_side}\KeywordTok{:}\AttributeTok{ }\StringTok{"3"}\CommentTok{                   \# position of the UMI in the I2 read sequence: 5 = UMI+BC, 3 = BC+UMI}
-\FunctionTok{UMI\_error\_rate}\KeywordTok{:}\AttributeTok{ }\DecValTok{0}
+\FunctionTok{UMI\_error\_rate}\KeywordTok{:}\AttributeTok{ }\DecValTok{0}\CommentTok{               \# use by cutadapt to remove reads without a correct UMI pattern. this is a proportion of UMI pattern length [0.0 {-} 1.0].IUPAC symbol are correctly handled.}
 \CommentTok{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}
 
 
@@ -474,7 +474,7 @@ equal to \textbf{6} are considered.
 \CommentTok{\# Prediction}
 \CommentTok{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}
 \FunctionTok{SWoffFinder}\KeywordTok{:}
-\AttributeTok{  }\FunctionTok{path}\KeywordTok{:}\AttributeTok{ }\StringTok{"/opt/SWOffinder"}\CommentTok{ \#\# Path to SWoffinder on your server (downloaded from https://github.com/OrensteinLab/SWOffinder)}
+\AttributeTok{  }\FunctionTok{path}\KeywordTok{:}\AttributeTok{ }\StringTok{"/opt/SWOffinder\_1.0.1/"}\CommentTok{ \#\# Path to SWoffinder on your server (downloaded from https://github.com/OrensteinLab/SWOffinder)}
 \AttributeTok{  }\FunctionTok{maxE}\KeywordTok{:}\AttributeTok{ }\DecValTok{6}\CommentTok{                 \# Max edits allowed (integer).}
 \AttributeTok{  }\FunctionTok{maxM}\KeywordTok{:}\AttributeTok{ }\DecValTok{6}\CommentTok{                 \# Max mismatches allowed without bulges (integer).}
 \AttributeTok{  }\FunctionTok{maxMB}\KeywordTok{:}\AttributeTok{ }\DecValTok{6}\CommentTok{                \# Max mismatches allowed with bulges (integer).}

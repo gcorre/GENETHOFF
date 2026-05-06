@@ -5,7 +5,7 @@ contact: "gcorre@genethon.fr"
 version: 'V1.0'
 
 clean_intermediates_files: 'FALSE'
-skip_demultiplexing: 'TRUE'
+skip_demultiplexing: 'FALSE'
 quantification: "umi" # use "umi" or "fragment" for the quantification (only if rescue_R2 is 'no")
 rescue_R2: "TRUE"     # Rescue R2 reads if R1 is too short or the pair doesn't align properly.
 
@@ -34,6 +34,7 @@ genome:
 ################################################
 
 ################################################
+demux_error_rate: 0.1  # max error rate for barecode during demultiplexing (this is applied to I1 and I2 concatenated)
 minLength: 25 ## Minimal read length after trimming, before alignment
 ################################################
 
@@ -49,11 +50,10 @@ maxFragLength: 1500        # Maximal fragment length after alignment
 # post alignment
 minMAPQ: 20                      # Min MAPQ score to keep alignments 
 UMI_hamming_distance: 1         # min distance to cluster UMI using network-based deduplication, use [0] to keep raw UMIs
-UMI_deduplication: "Adjacency"  # method to correct UMI (cluster or Adjacency)
+UMI_deduplication: "directional"  # method to correct UMI (cluster or Adjacency)
 UMI_pattern: "NNWNNWNN"
-UMI_filter: "TRUE"              # If TRUE, remove UMIs that do no match the expected pattern [FALSE or TRUE]
 UMI_side: "3"                   # position of the UMI in the I2 read sequence: 5 = UMI+BC, 3 = BC+UMI
-UMI_error_rate: 0
+UMI_error_rate: 0               # use by cutadapt to remove reads without a correct UMI pattern. this is a proportion of UMI pattern length [0.0 - 1.0].IUPAC symbol are correctly handled.
 ################################################
 
 
@@ -77,7 +77,7 @@ minUMI_alignments_figure: 1       # filter clusters with more than n UMI in the 
 # Prediction
 ################################################
 SWoffFinder:
-  path: "/opt/SWOffinder" ## Path to SWoffinder on your server (downloaded from https://github.com/OrensteinLab/SWOffinder)
+  path: "/opt/SWOffinder_1.0.1/" ## Path to SWoffinder on your server (downloaded from https://github.com/OrensteinLab/SWOffinder)
   maxE: 6                 # Max edits allowed (integer).
   maxM: 6                 # Max mismatches allowed without bulges (integer).
   maxMB: 6                # Max mismatches allowed with bulges (integer).
