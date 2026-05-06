@@ -2,12 +2,14 @@
 author: "Guillaume CORRE, PhD"
 affiliation: "Therapeutic Gene Editing - GENETHON, INSERM U951, Paris-Saclay University, Evry, France"
 contact: "gcorre@genethon.fr"
-version: 'V1.0'
+version: 'V1.3'
 
 clean_intermediates_files: 'FALSE'
 skip_demultiplexing: 'FALSE'
-quantification: "umi" # use "umi" or "fragment" for the quantification (only if rescue_R2 is 'no")
-rescue_R2: "TRUE"     # Rescue R2 reads if R1 is too short or the pair doesn't align properly.
+quantification: "umi"                # use "umi" or "fragment" for the quantification (only if rescue_R2 is 'no")
+rescue_R2: "TRUE"                    # Rescue R2 reads if R1 is too short or the pair doesn't align properly.
+stop_after_umi_correction: "FALSE"    # Wether to stop just after the UMI correction step (no annotation ,no reporting, no gRNA match)
+
 
 ## Library informations
 sampleInfo_path: "sampleInfo.csv"
@@ -35,12 +37,12 @@ genome:
 
 ################################################
 demux_error_rate: 0.1  # max error rate for barecode during demultiplexing (this is applied to I1 and I2 concatenated)
-minLength: 25 ## Minimal read length after trimming, before alignment
+minLength: 25          # Minimal read length after trimming, before alignment
 ################################################
 
 ## Alignement 
 ################################################
-aligner: "bowtie2"   ## Aligner to use (bowtie2 or bwa)
+aligner: "bowtie2"         # Aligner to use (bowtie2 or bwa)
 minFragLength: 100         # Minimal fragment length after alignment
 maxFragLength: 1500        # Maximal fragment length after alignment 
 
@@ -48,11 +50,11 @@ maxFragLength: 1500        # Maximal fragment length after alignment
 
 ################################################
 # post alignment
-minMAPQ: 20                      # Min MAPQ score to keep alignments 
-UMI_hamming_distance: 1         # min distance to cluster UMI using network-based deduplication, use [0] to keep raw UMIs
+minMAPQ: 20                       # Min MAPQ score to keep alignments 
+UMI_hamming_distance: 1           # min distance to cluster UMI using network-based deduplication, use [0] to keep raw UMIs
 UMI_deduplication: "directional"  # method to correct UMI (cluster or Adjacency)
-UMI_side: "3"                   # position of the UMI in the I2 read sequence: 5 = UMI+BC, 3 = BC+UMI
-UMI_error_rate: 0               # use by cutadapt to remove reads without a correct UMI pattern. this is a proportion of UMI pattern length [0.0 - 1.0].IUPAC symbol are correctly handled.
+UMI_side: "3"                     # position of the UMI in the I2 read sequence: 5 = UMI+BC, 3 = BC+UMI
+UMI_error_rate: 0                 # use by cutadapt to remove reads without a correct UMI pattern. this is a proportion of UMI pattern length [0.0 - 1.0].IUPAC symbol are correctly handled.
 ################################################
 
 

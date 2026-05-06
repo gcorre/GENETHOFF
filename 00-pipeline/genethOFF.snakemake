@@ -304,10 +304,24 @@ else:
 # THIS IS THE WORKFLOW
 ###############################################################
 
+# rule target:
+#     input:
+#      "results/"+os.path.basename(os.getcwd())+"_report.html"
+
+
 rule target:
     input:
-     ["05-Report/{sample}_summary_grna.csv".format(sample=sample) for sample in samples_unique],
-     "results/"+os.path.basename(os.getcwd())+"_report.html"
+        lambda wildcards: (
+            expand(
+                "04-IScalling/{sample}.reads_per_UMI_per_IS_corrected.bed",
+                sample=samples_unique
+            )
+            if config["stop_after_umi_correction"].upper() == "TRUE"
+            else [
+                f"results/{os.path.basename(os.getcwd())}_report.html"
+            ]
+        )
+
      
 
 rule get_chrom_length:
@@ -863,7 +877,6 @@ rule predict_offtarget_SWOffinder:
             sequence={params.gRNA}{params.PAM}
             java -cp {params.SWoffFinder}/bin SmithWatermanOffTarget.SmithWatermanOffTargetSearchAlign --genome {params.genome} --sgrnas $sequence --output 06-offPredict/{wildcards.gen}_{wildcards.grna}_{wildcards.pam}_{wildcards.side} --maxE {params.maxE} --maxM {params.maxM} --maxMB {params.maxMB} --maxB $(echo $bulge_size) --threads {threads} --allowPamEdits TRUE --windowSize {params.window_size} --pam {params.PAM} --bestWindow TRUE
         fi
-        
         """
 
 

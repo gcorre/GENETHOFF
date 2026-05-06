@@ -4,23 +4,33 @@ properties:
   clean_intermediates_files:
     enum: ["true","false","TRUE","FALSE"]
     type: string
+    default: "TRUE"
   skip_demultiplexing:
     enum: ["true","false","TRUE","FALSE"]
+    default: "FALSE"
     type: string
   quantification:
     enum: ["umi","fragment"]
+    default: "umi"
+    type: string
+  stop_after_umi_correction:
+    enum: ["true","false","TRUE","FALSE"]
+    default: "FALSE"
     type: string
   sampleInfo_path:
     type: string
   rescue_R2:
     enum: ["true","false","TRUE","FALSE"]
     type: string
+    default: "TRUE"
   tolerate_bulges:
     enum: ["true","false","TRUE","FALSE"]
+    default: "TRUE"
     type: string
   UMI_deduplication:
     enum: ["adjacency","cluster","directional","unique","percentile"]
     type: string
+    default: "directional"
   UMI_side:
     enum: ["5","3"]
     type: string
@@ -39,3 +49,4 @@ required:
   - UMI_deduplication
   - UMI_side
   - UMI_error_rate
+  - stop_after_umi_correction
