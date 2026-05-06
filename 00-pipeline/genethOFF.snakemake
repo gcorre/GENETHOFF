@@ -454,11 +454,15 @@ rule add_UMI:
         UMI_length=$(expr length {params.UMI})
         
         if [ "{params.UMI_side}" = "5" ]; then
-          cutadapt -j {threads} -g "^{params.UMI}" -e {params.UMI_error}  --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
-          cutadapt -j {threads} -g "^{params.UMI}" -e {params.UMI_error}  --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
+        
+          cutadapt -j {threads} -g "^{params.UMI}" -O $UMI_length -e {params.UMI_error} --no-indels --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
+          cutadapt -j {threads} -g "^{params.UMI}" -O $UMI_length -e {params.UMI_error} --no-indels --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
+          
         else
-          cutadapt -j {threads} -a "{params.UMI}$" -e {params.UMI_error}  --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
-          cutadapt -j {threads} -a "{params.UMI}$" -e {params.UMI_error}  --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
+        
+          cutadapt -j {threads} -a "{params.UMI}$" -O $UMI_length -e {params.UMI_error} --no-indels --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
+          cutadapt -j {threads} -a "{params.UMI}$" -O $UMI_length -e {params.UMI_error} --no-indels --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
+          
         fi 
         """
 
@@ -736,6 +740,20 @@ rule callIS_R2rescued:
 
 #######################
 
+# rule correct_UMI:
+#     input: 
+#       bed=rules.call_IS.output.umi, 
+#       bed_rescued=lambda wildcards: f"04-IScalling/{wildcards.sample}_rescueR2.bed" if config["rescue_R2"].lower()=="true" and config["quantification"].lower()=="umi" else rules.call_IS.output.umi 
+#     output:  
+#       "04-IScalling/{sample}.reads_per_UMI_per_IS_corrected.bed"
+#     conda: "GENETHOFF"
+#     threads: 2
+#     params: hamming=config["UMI_hamming_distance"], method = config["UMI_deduplication"], rescueR2=config["rescue_R2"].upper()
+#     shell: """
+#         Rscript {workflow.basedir}/correct_umi.R {input.bed} {params.hamming} {params.method} {output} {params.rescueR2}
+#         """
+
+
 rule correct_UMI:
     input: 
       bed=rules.call_IS.output.umi, 
@@ -746,8 +764,10 @@ rule correct_UMI:
     threads: 2
     params: hamming=config["UMI_hamming_distance"], method = config["UMI_deduplication"], rescueR2=config["rescue_R2"].upper()
     shell: """
-        Rscript {workflow.basedir}/correct_umi.R {input.bed} {params.hamming} {params.method} {output} {params.rescueR2}
+        python {workflow.basedir}/correct_umi.py -i {input.bed} -t {params.hamming} --method {params.method} -o {output} -r {params.rescueR2}
         """
+
+
 
 
 rule Collapse_UMI_IS:
@@ -841,10 +861,10 @@ rule predict_offtarget_SWOffinder:
         if [ {params.PAM_side} = "5" ];
         then
             sequence={params.PAM}{params.gRNA}
-            java -cp {params.SWoffFinder}/bin SmithWatermanOffTarget.SmithWatermanOffTargetSearchAlign {params.genome} $sequence 06-offPredict/{wildcards.gen}_{wildcards.grna}_{wildcards.pam}_{wildcards.side} {params.maxE} {params.maxM} {params.maxMB} $(echo $bulge_size) {threads} TRUE {params.window_size} {params.PAM} TRUE
+            java -cp {params.SWoffFinder}/bin SmithWatermanOffTarget.SmithWatermanOffTargetSearchAlign --genome {params.genome} --sgrnas $sequence --output 06-offPredict/{wildcards.gen}_{wildcards.grna}_{wildcards.pam}_{wildcards.side} --maxE {params.maxE} --maxM {params.maxM} --maxMB {params.maxMB} --maxB $(echo $bulge_size) --threads {threads} --allowPamEdits TRUE --windowSize {params.window_size} --pam {params.PAM} --bestWindow TRUE
         else
             sequence={params.gRNA}{params.PAM}
-            java -cp {params.SWoffFinder}/bin SmithWatermanOffTarget.SmithWatermanOffTargetSearchAlign {params.genome} $sequence 06-offPredict/{wildcards.gen}_{wildcards.grna}_{wildcards.pam}_{wildcards.side} {params.maxE} {params.maxM} {params.maxMB} $(echo $bulge_size) {threads} TRUE {params.window_size} {params.PAM} TRUE
+            java -cp {params.SWoffFinder}/bin SmithWatermanOffTarget.SmithWatermanOffTargetSearchAlign --genome {params.genome} --sgrnas $sequence --output 06-offPredict/{wildcards.gen}_{wildcards.grna}_{wildcards.pam}_{wildcards.side} --maxE {params.maxE} --maxM {params.maxM} --maxMB {params.maxMB} --maxB $(echo $bulge_size) --threads {threads} --allowPamEdits TRUE --windowSize {params.window_size} --pam {params.PAM} --bestWindow TRUE
         fi
         
         """

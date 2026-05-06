@@ -23,13 +23,13 @@ library(pwalign,quietly = T, verbose = F,warn.conflicts = F)
 # get argument from command line 
 
 #debug
-args <- c("04-IScalling/VEGFA_s1_K562_neg.cluster_slop.bed",
-          "04-IScalling/VEGFA_s1_K562_neg.UMIs_per_IS_in_Cluster.bed",
-          "GRCh38.rds",
-          "OncoList_OncoKB_GRCh38_2025-07-04.tsv",
-          "06-offPredict/GRCh38_GGGTGGGGGGAGTTTGCTCC_NGG_3.csv",
+args <- c("04-IScalling/SaKo8_ODN.cluster_slop.bed",
+          "04-IScalling/SaKo8_ODN.UMIs_per_IS_in_Cluster.bed",
+          "GRCm39.rds",
+          "None",
+          "06-offPredict/GRCm39_TGTCCAGGGCTAGCTTAACG_NNGRRT_6.csv",
           50,
-          "results/VEGFA_s1_K562_neg_summary.csv"
+          "results/SaKo8_ODN_summary.csv"
           )
 
 
@@ -299,8 +299,11 @@ if(nrow(clusters_df)>0){
   # 09 - Perform cluster/prediction annotation ----
   #----------------------------------------------------------#
   
-  prediction_gRNA <- data.table::fread(args[5], sep =",")
-  prediction_gRNA <- prediction_gRNA %>% mutate(Chromosome = str_match(Chromosome,"^((chr)?[0-9XYMT]+)")[,2])
+  prediction_gRNA <- data.table::fread(args[5], sep =",") %>% 
+    filter(str_starts(Chromosome, "(chr)?[0-9XYMT]+"))
+  prediction_gRNA <- prediction_gRNA %>% 
+    mutate(Chromosome = str_match(Chromosome,"^((chr)?[0-9XYMT]+)")[,2]) %>% 
+    filter(!is.na(Chromosome))
   
   prediction_chromosome_name_format <- ifelse(all(str_starts(prediction_gRNA$Chromosome, "chr")),yes = "long",no = "short")
   
