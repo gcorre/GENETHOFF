@@ -1,4 +1,4 @@
-This is cutadapt 5.0 with Python 3.12.11
+This is cutadapt 5.0 with Python 3.12.13
 Command line parameters: -g ^file:demultiplexing.fa -j 6 -e 0.1 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{name}_I3.fastq.gz -p 00-demultiplexing/{name}_R1.fastq.gz index_files.fastq Undetermined_S0_L001_R1_001.fastq.gz
 Building index of 2 adapters ...
 Built an index containing 98 strings.

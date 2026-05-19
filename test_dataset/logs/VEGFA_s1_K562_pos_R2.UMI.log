@@ -1,4 +1,4 @@
-This is cutadapt 5.0 with Python 3.12.11
+This is cutadapt 5.0 with Python 3.12.13
 Command line parameters: -j 6 -a NNWNNWNN$ -O 8 -e 0 --no-indels --rename={id}_{r1.match_sequence} {comment} --action=none --discard-untrimmed -o 01-trimming/VEGFA_s1_K562_pos_I2.UMI.fastq.gz -p 01-trimming/VEGFA_s1_K562_pos_R2.UMI.fastq.gz 00-demultiplexing/VEGFA_s1_K562_pos_I3.fastq.gz 00-demultiplexing/VEGFA_s1_K562_pos_R2.fastq.gz
 Processing paired-end reads on 6 cores ...
 

@@ -25,10 +25,10 @@ I2: "Undetermined_S0_L001_I2_001.fastq.gz"
 ## path to references
 genome:
   GRCh38:
-    fasta: "/media/References/Human/ensembl/GRCh38/Sequences/Homo_sapiens.GRCh38.dna.primary_assembly_ChrOnly.fa"
-    index: "/media/References/Human/ensembl/GRCh38/Indexes/Bowtie2/Homo_sapiens.GRCh38.dna.primary_assembly_ChrOnly"
-    annotation: "/media/References/Human/ensembl/GRCh38/Annotations/Homo_sapiens.GRCh38.113.chr.gtf.gz"
-    oncogene_list: "/media/References/Human/ensembl/GRCh38/Annotations/OncoList_OncoKB_GRCh38_2025-07-04.tsv"
+    fasta: "../04-references/Homo_sapiens.GRCh38.dna.primary_assembly_chrOnly.fa"
+    index: "../04-references/Homo_sapiens.GRCh38.dna.primary_assembly_chrOnly"
+    annotation: "../04-references/Homo_sapiens.GRCh38.115.chr.gtf.gz"
+    oncogene_list: "../02-ressources/OncoList_OncoKB_GRCh38_2025-07-04.tsv"
   mouse:
     fasta: ""
     index: ""
