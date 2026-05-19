@@ -38,4 +38,4 @@ dependencies:
   - bioconductor-decipher
   - bioconductor-rtracklayer
   - cowpy
-  - umi-tools=1.1.6
+  - umi_tools=1.1.6
