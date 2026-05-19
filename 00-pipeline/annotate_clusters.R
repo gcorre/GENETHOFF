@@ -23,14 +23,14 @@ library(pwalign,quietly = T, verbose = F,warn.conflicts = F)
 # get argument from command line 
 
 #debug
-args <- c("04-IScalling/SaKo8_ODN.cluster_slop.bed",
-          "04-IScalling/SaKo8_ODN.UMIs_per_IS_in_Cluster.bed",
-          "GRCm39.rds",
-          "None",
-          "06-offPredict/GRCm39_TGTCCAGGGCTAGCTTAACG_NNGRRT_6.csv",
-          50,
-          "results/SaKo8_ODN_summary.csv"
-          )
+# args <- c("04-IScalling/SaKo8_ODN.cluster_slop.bed",
+#           "04-IScalling/SaKo8_ODN.UMIs_per_IS_in_Cluster.bed",
+#           "GRCm39.rds",
+#           "None",
+#           "06-offPredict/GRCm39_TGTCCAGGGCTAGCTTAACG_NNGRRT_6.csv",
+#           50,
+#           "results/SaKo8_ODN_summary.csv"
+#           )
 
 
 args <- commandArgs(trailingOnly = T)

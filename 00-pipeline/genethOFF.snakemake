@@ -956,8 +956,10 @@ onsuccess:
     shell("conda run -n GENETHOFF bash {workflow.basedir}/../02-ressources/success.sh")
     if (config["clean_intermediates_files"].lower() == "true") & (config["stop_after_umi_correction"].lower() == "false"):
       shell("rm -r 0*/")
-    else:
+    elif (config["clean_intermediates_files"].lower() == "true") & (config["stop_after_umi_correction"].lower() == "true"):
       print(" !!! I cannot remove intermediate files if 'stop_after_umi_correction' is set to TRUE ")
+    else:
+      print("")
 
 onerror:
     print("An error occurred")
