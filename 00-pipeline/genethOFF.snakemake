@@ -701,10 +701,26 @@ rule call_IS:
 
 
 ############ RESCUE R2 READS ###################
-rule rescue_R2:
+
+rule collapse_filter_R2:
   input: 
    R2_short=rules.filter_reads.output.R2short,
    R2_unmapped=rules.alignOnGenome.output.R2_unmapped
+  output:
+   R2=temp("02-filtering/{sample}_R2.UMI.ODN.trimmed.filtered.rescued.fastq.gz"),
+   R2_filt=temp("02-filtering/{sample}_R2.UMI.ODN.trimmed.filtered.rescued.filtered.fastq.gz")
+  threads: 1
+  conda: "GENETHOFF"
+  params: length=config["minLength"]
+  log: "logs/{sample}_R2rescued.UMI.ODN.trimmed.filtered.rescued_filter.log"
+  shell: """
+    cat {input.R2_short} {input.R2_unmapped} > {output.R2} 
+    cutadapt -j {threads} --minimum-length {params.length} --output {output.R2_filt} {output.R2} > {log}
+  """
+
+rule rescue_R2:
+  input: 
+   R2=rules.collapse_filter_R2.output.R2_filt
   output: 
     sam=temp("03-align/{sample}_R2rescued.UMI.ODN.trimmed.filtered.sam")
   threads: 6
@@ -714,7 +730,7 @@ rule rescue_R2:
   shell: """
     bowtie2 -p {threads} --no-unal \
     -x {params.index} \
-    -U {input.R2_short} {input.R2_unmapped} -S {output.sam} 2> {log}
+    -U {input.R2} -S {output.sam} 2> {log}
       """
 
 rule sort_rescued_R2:
