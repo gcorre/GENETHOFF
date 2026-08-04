@@ -421,12 +421,17 @@ rule merge_libraries:
   output:
     R1="00-demultiplexing/{sample}_R1.fastq.gz", 
     R2="00-demultiplexing/{sample}_R2.fastq.gz", 
-    I3="00-demultiplexing/{sample}_I3.fastq.gz"
+    I3="00-demultiplexing/{sample}_I3.fastq.gz",
+    stat="logs/{sample}/{sample}_raw.rnames"
+  conda: "GENETHOFF"
   shell:
     """
       cat 00-demultiplexing/{wildcards.sample}-*_R1.fastq.gz > {output.R1}
       cat 00-demultiplexing/{wildcards.sample}-*_R2.fastq.gz > {output.R2}
       cat 00-demultiplexing/{wildcards.sample}-*_I3.fastq.gz > {output.I3}
+      
+      seqkit fx2tab -n {output.R2} -i > {output.stat}
+      
     """
 
 # make an I2 file : extract UMI from read header
@@ -434,11 +439,14 @@ rule make_I2:
   input:
     R1="00-demultiplexing/{sample}_R1.fastq.gz"
   output:
-    temp("00-demultiplexing/{sample}_I3b.fastq.gz")
+    I3=temp("00-demultiplexing/{sample}_I3b.fastq.gz"),
+    stat="logs/{sample}/{sample}_raw.rnames"
   threads: 1
   conda: "GENETHOFF"
   shell: """
-    python {workflow.basedir}/../03-misc/extract_I2_from_header.py {input} {output}
+    python {workflow.basedir}/../03-misc/extract_I2_from_header.py {input} {output.I3}
+    seqkit fx2tab -n {input.R1} -i > {output.stat}
+
   """
   
 
@@ -456,28 +464,32 @@ rule add_UMI:
   output: 
     R1=temp("01-trimming/{sample}_R1.UMI.fastq.gz"),
     R2=temp("01-trimming/{sample}_R2.UMI.fastq.gz"),
-    I2=temp("01-trimming/{sample}_I2.UMI.fastq.gz")
+    I2=temp("01-trimming/{sample}_I2.UMI.fastq.gz"),
+    stat="logs/{sample}/{sample}_umi.rnames"
   threads:6
   log: R1="logs/{sample}_R1.UMI.log", R2="logs/{sample}_R2.UMI.log"    
   conda: "GENETHOFF"
   params:
-    UMI=lambda wildcards:samplesTable["UMI_pattern"][wildcards.sample],
+    UMI=lambda wildcards:my_list["UMI_pattern"][wildcards.sample].strip(),
     UMI_side=config["UMI_side"], ## either 5 (left) or 3 (right)
     UMI_error=config["UMI_error_rate"]
   shell: """
+  
         UMI_length=$(expr length {params.UMI})
         
         if [ "{params.UMI_side}" = "5" ]; then
         
-          cutadapt -j {threads} -g "^{params.UMI}" -O $UMI_length -e {params.UMI_error} --no-indels --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
-          cutadapt -j {threads} -g "^{params.UMI}" -O $UMI_length -e {params.UMI_error} --no-indels --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
+          cutadapt -j {threads} -g "^{params.UMI}" -O $UMI_length -e {params.UMI_error} --no-indels --rename='{{id}}_{{r1.match_sequence}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
+          cutadapt -j {threads} -g "^{params.UMI}" -O $UMI_length -e {params.UMI_error} --no-indels --rename='{{id}}_{{r1.match_sequence}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
           
         else
         
-          cutadapt -j {threads} -a "{params.UMI}$" -O $UMI_length -e {params.UMI_error} --no-indels --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
-          cutadapt -j {threads} -a "{params.UMI}$" -O $UMI_length -e {params.UMI_error} --no-indels --rename='{{id}}_{{r1.match_sequence}} {{comment}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
-          
+          cutadapt -j {threads} -a "{params.UMI}$" -O $UMI_length -e {params.UMI_error} --no-indels --rename='{{id}}_{{r1.match_sequence}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
+          cutadapt -j {threads} -a "{params.UMI}$" -O $UMI_length -e {params.UMI_error} --no-indels --rename='{{id}}_{{r1.match_sequence}}' --action=none --discard-untrimmed -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
+
         fi 
+        
+        seqkit fx2tab -n {output.R1} -i > {output.stat}
         """
 
 
@@ -496,7 +508,8 @@ rule trim_ODN:
         )
   output: 
     R1=temp("01-trimming/{sample}_R1.ODN.UMI.fastq.gz"),
-    R2=temp("01-trimming/{sample}_R2.ODN.UMI.fastq.gz")
+    R2=temp("01-trimming/{sample}_R2.ODN.UMI.fastq.gz"),
+    stat="logs/{sample}/{sample}_umi-odn.rnames"
   threads: 6
   log:R1="logs/{sample}_R1.odn.log"
   conda: "GENETHOFF"
@@ -504,7 +517,9 @@ rule trim_ODN:
   params: ODN_pos=lambda wildcards: config[samples["type"][wildcards.sample]]["positive"]["R2_leading"],
     ODN_neg=lambda wildcards: config[samples["type"][wildcards.sample]]["negative"]["R2_leading"]
   shell: """
-        cutadapt -j {threads} -G "negative={params.ODN_neg};max_error_rate=0;rightmost" -G "positive={params.ODN_pos};max_error_rate=0;rightmost" --discard-untrimmed  --rename='{{id}}_{{r2.adapter_name}} {{comment}}' -o {output.R1} -p {output.R2} {input.R1} {input.R2} > {log.R1}
+        cutadapt -j {threads} -G "negative={params.ODN_neg};max_error_rate=0;rightmost" -G "positive={params.ODN_pos};max_error_rate=0;rightmost" --discard-untrimmed  --rename='{{id}}_{{r2.adapter_name}}' -o {output.R1} -p {output.R2} {input.R1} {input.R2} > {log.R1}
+          
+        seqkit fx2tab -n {output.R1} -i > {output.stat}
           """
 
 
@@ -544,7 +559,9 @@ rule filter_reads:
     R1="02-filtering/{sample}_R1.UMI.ODN.trimmed.filtered.fastq.gz", 
     R2="02-filtering/{sample}_R2.UMI.ODN.trimmed.filtered.fastq.gz",
     R1short=temp("02-filtering/{sample}_R1.UMI.ODN.trimmed.tooshort.fastq.gz"), 
-    R2short=temp("02-filtering/{sample}_R2.UMI.ODN.trimmed.tooshort.fastq.gz")
+    R2short=temp("02-filtering/{sample}_R2.UMI.ODN.trimmed.tooshort.fastq.gz"),
+    stat_long="logs/{sample}/{sample}_umi-odn-longPairs.rnames",
+    stat_short="logs/{sample}/{sample}_umi-odn-shortPairs.rnames"
   threads: 6
   log: "logs/{sample}.filter.log"
   params: length=config["minLength"]
@@ -558,6 +575,9 @@ rule filter_reads:
           --too-short-paired-output  {output.R2short} \
           --output {output.R1} \
           --paired-output {output.R2} {input.R1} {input.R2} > {log}
+          
+          seqkit fx2tab -n {output.R1} -i > {output.stat_long}
+          seqkit fx2tab -n {output.R1short} -i > {output.stat_short}
         """
 
 
@@ -570,7 +590,8 @@ if (config["aligner"]  == "bowtie2" or config["aligner"]  == "Bowtie2") :
         output: 
           sam=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sam"),
           R1_unmapped=temp("03-align/{sample}_R1.UMI.ODN.trimmed.unmapped.fastq.gz"),
-          R2_unmapped=temp("03-align/{sample}_R2.UMI.ODN.trimmed.unmapped.fastq.gz")
+          R2_unmapped=temp("03-align/{sample}_R2.UMI.ODN.trimmed.unmapped.fastq.gz"),
+          stat_unmap="logs/{sample}/{sample}_umi-odn-longPairs-unmapped.rnames"
         threads: 6
         log: "logs/{sample}.UMI.ODN.trimmed.filtered.align.log"
         conda: "GENETHOFF"
@@ -589,6 +610,8 @@ if (config["aligner"]  == "bowtie2" or config["aligner"]  == "Bowtie2") :
                   --un-conc-gz 03-align/{wildcards.sample}_R%.UMI.ODN.trimmed.unmapped.fastq.gz   \
                   -x {params.index} \
                   -1 {input.R1} -2 {input.R2} -S {output.sam} 2> {log}
+                  
+                seqkit fx2tab -n {output.R1_unmapped} -i > {output.stat_unmap}
             """
 
 elif (config["aligner"]  == "bwa") :
@@ -650,7 +673,7 @@ rule sort_aligned_name:
     input: 
       bam=rules.sort_aligned.output.bam
     output: 
-      bamName="03-align/{sample}.UMI.ODN.trimmed.filtered.sortedName.filtered.bam"
+      bamName=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sortedName.filtered.bam")
     threads: 6
     conda: "GENETHOFF"
     message: "Sort reads by name"
@@ -669,12 +692,17 @@ rule call_IS:
       rules.sort_aligned_name.output.bamName
     output: 
       tmp=temp("04-IScalling/{sample}.pebed"), 
-      umi="04-IScalling/{sample}.reads_per_UMI_per_IS.bed"
+      umi="04-IScalling/{sample}.reads_per_UMI_per_IS.bed",
+      stat_map="logs/{sample}/{sample}_umi-odn-longPairs-mapped.rnames",
     threads: 1
     conda: "GENETHOFF"
     params: quantif=config["quantification"].lower()
     shell: """
         bedtools bamtobed -bedpe -mate1 -i {input} > {output.tmp}
+      
+        # write read names to file
+        awk '{{print $7}}' {output.tmp} | sort |  uniq > {output.stat_map}
+        
         if [ {params.quantif} = "umi" ] ; 
         
         
@@ -708,7 +736,9 @@ rule collapse_filter_R2:
    R2_unmapped=rules.alignOnGenome.output.R2_unmapped
   output:
    R2=temp("02-filtering/{sample}_R2.UMI.ODN.trimmed.filtered.rescued.fastq.gz"),
-   R2_filt=temp("02-filtering/{sample}_R2.UMI.ODN.trimmed.filtered.rescued.filtered.fastq.gz")
+   R2_filt=temp("02-filtering/{sample}_R2.UMI.ODN.trimmed.filtered.rescued.filtered.fastq.gz"),
+   statR2="logs/{sample}/{sample}_umi-odn-shortPairs-r2.rnames",
+   statR2filt="logs/{sample}/{sample}_umi-odn-shortPairs-r2-long.rnames"
   threads: 1
   conda: "GENETHOFF"
   params: length=config["minLength"]
@@ -716,9 +746,12 @@ rule collapse_filter_R2:
   shell: """
     cat {input.R2_short} {input.R2_unmapped} > {output.R2} 
     cutadapt -j {threads} --minimum-length {params.length} --output {output.R2_filt} {output.R2} > {log}
+    
+    seqkit fx2tab -n {output.R2} -i > {output.statR2}
+    seqkit fx2tab -n {output.R2_filt} -i > {output.statR2filt}
   """
 
-rule rescue_R2:
+rule align_rescue_R2:
   input: 
    R2=rules.collapse_filter_R2.output.R2_filt
   output: 
@@ -734,7 +767,7 @@ rule rescue_R2:
       """
 
 rule sort_rescued_R2:
-  input: rules.rescue_R2.output
+  input: rules.align_rescue_R2.output
   output: "03-align/{sample}_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam"
   conda: "GENETHOFF"
   threads:6
@@ -748,13 +781,15 @@ rule callIS_R2rescued:
   input: rules.sort_rescued_R2.output
   output: 
     umi="04-IScalling/{sample}_R2rescued.reads_per_UMI_per_IS.bed", 
-    tmp=temp("04-IScalling/{sample}_rescueR2.bed")
+    tmp=temp("04-IScalling/{sample}_rescueR2.bed"),
+    stat="logs/{sample}/{sample}_umi-odn-shortPairs-r2-long-align.rnames"
   threads: 1
   conda: "GENETHOFF"
   shell: """
   
       bedtools bamtobed -i {input} > {output.tmp}
       
+      awk '{{print $7}}' {output.tmp} | sort |  uniq  > {output.stat}
       # read R2 contains the genome/ODN junction
       
       ##################################################################
@@ -762,9 +797,7 @@ rule callIS_R2rescued:
       ##################################################################
 
       awk 'BEGIN{{OFS="\\t";FS="\\t"}} {{split($4,a,"_"); if($6=="+") print $1,$2,$2,a[1],a[2],a[3],$5,$6; else print $1,$3-1,$3-1,a[1],a[2],a[3],$5,$6}}' {output.tmp} | sort -k1,1 -k2,3n -k6,6 -k8,8 -k5,5 | bedtools groupby -g 1,2,3,6,8,5 -c 4,7 -o count_distinct,median  > {output.umi}
-      
-      """
-
+      """ 
 #######################
 
 # rule correct_UMI:
@@ -954,6 +987,36 @@ rule prepare_tables:
         Rscript {workflow.basedir}/prepare_tables.r "{input.summaries}" {params.sampleInfo} {params.config}  {params.minUMI_alignments_figure} {params.max_clusters} {output.libraries_xlsx}
         
         """
+
+# rule readFate:
+#   input:
+#     r2_mapped=rules.callIS_R2rescued.output.stat, 
+#     r2_rescued=rules.collapse_filter_R2.output.statR2,
+#     r2_rescued_filt=rules.collapse_filter_R2.output.statR2filt,
+#     pairs_map=rules.call_IS.output.stat_map,
+#     pair_unmap=rules.alignOnGenome.output.stat_unmap,
+#     pairs_long=rules.filter_reads.output.stat_long,
+#     pairs_odn=rules.trim_ODN.output.stat,
+#     pairs_umi=rules.add_UMI.output.stat,
+#     raw="00-demultiplexing/{sample}_R1.fastq.gz"
+   
+   
+#   output: fate="logs/{sample}/{sample}_readFate.csv"
+#   conda: "GENETHOFF"
+#   shell: """
+#       python ../00-pipeline/readFateCollapse.py --init -o {output.fate} {output.stat}
+#           python ../00-pipeline/readFateCollapse.py --step "has_UMI" -o {output.fate} {output.stat}
+
+#           python ../00-pipeline/readFateCollapse.py --step "has_ODN" -o {output.fate} {output.stat}
+
+#             python ../00-pipeline/readFateCollapse.py --step "is_long_pair" -o {output.fate} {output.stat_long}
+#                           python ../00-pipeline/readFateCollapse.py --step "is_unmapped_pair" -o {output.fate} {output.stat_unmap}
+#         python ../00-pipeline/readFateCollapse.py --step "is_mapped_pair" -o {output.fate} {output.stat_map}
+#       python ../00-pipeline/readFateCollapse.py --step "is_R2rescued" -o {output.fate} {output.statR2}
+#     python ../00-pipeline/readFateCollapse.py --step "R2rescued_passLength" -o {output.fate} {output.statR2filt}
+#         python ../00-pipeline/readFateCollapse.py --step "is_map_R2rescued" -o {output.fate} {output.stat}
+#   """
+
 
 
 rule make_report:
