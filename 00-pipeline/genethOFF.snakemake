@@ -357,7 +357,7 @@ rule make_index_file:
     output: 
       I3=temp("index_files.fastq")
     conda: "GENETHOFF"
-    threads: 6
+    threads: 1
     params: UMI_side=str(config["UMI_side"]) 
     shell: """
         if [ {params.UMI_side} = "3" ]; then
@@ -372,6 +372,7 @@ rule make_index_barcodes:
     input: 
     output: temp("demultiplexing.fa")
     params: UMI_side=str(config["UMI_side"]) 
+    threads: 1
     run: 
         sample_count = defaultdict(int)
         with open("demultiplexing.fa", 'w') as fasta_file_i1:
@@ -401,7 +402,7 @@ rule demultiplex_samples:
       I3=temp(["00-demultiplexing/{sample}-1_I3.fastq.gz".format(sample=sample) for sample in samples["sampleName"]])
     conda: "GENETHOFF"
     log: R1= "logs/demultiplexing_i1_R1.log"
-    threads: 6
+    threads: workflow.cores
     params: UMI_side=config["UMI_side"], demux_error=config["demux_error_rate"]
     shell: """
         if [ {params.UMI_side} = "3" ]; then
@@ -424,6 +425,7 @@ rule merge_libraries:
     I3="00-demultiplexing/{sample}_I3.fastq.gz",
     stat="logs/{sample}/{sample}_raw.rnames"
   conda: "GENETHOFF"
+  threads: 1
   shell:
     """
       cat 00-demultiplexing/{wildcards.sample}-*_R1.fastq.gz > {output.R1}
@@ -446,10 +448,8 @@ rule make_I2:
   shell: """
     python {workflow.basedir}/../03-misc/extract_I2_from_header.py {input} {output.I3}
     seqkit fx2tab -n {input.R1} -i > {output.stat}
-
   """
   
-
   
 # Add UMI to read name
 rule add_UMI:
@@ -470,7 +470,7 @@ rule add_UMI:
   log: R1="logs/{sample}_R1.UMI.log", R2="logs/{sample}_R2.UMI.log"    
   conda: "GENETHOFF"
   params:
-    UMI=lambda wildcards:my_list["UMI_pattern"][wildcards.sample].strip(),
+    UMI=lambda wildcards:samples["UMI_pattern"][wildcards.sample],
     UMI_side=config["UMI_side"], ## either 5 (left) or 3 (right)
     UMI_error=config["UMI_error_rate"]
   shell: """
@@ -646,7 +646,7 @@ rule filter_alignments:
     params: minMAPQ=config["minMAPQ"]
     shell: """
     # https://biofinysics.blogspot.com/2014/05/how-does-bowtie2-assign-mapq-scores.html#bt2expt 
-        samtools view  {input} -e '((mapq ==1 && [AS] == [XS]) || (mapq >={params.minMAPQ}) || (mapq == 6))' | cut -f1 | sort | uniq  > {output.list}
+        samtools view -@ {threads} {input} -e '((mapq ==1 && [AS] == [XS]) || (mapq >={params.minMAPQ}) || (mapq == 6))' | cut -f1 | sort | uniq  > {output.list}
     """
 
 
@@ -665,7 +665,7 @@ rule sort_aligned:
     shell: """
         samtools sort -@ {threads} {input.sam}  > {output.bamPos}
 
-        samtools view -hb --qname-file {input.list}  {output.bamPos} > {output.bam}
+        samtools view -@ {threads} -hb --qname-file {input.list}  {output.bamPos} > {output.bam}
         samtools index {output.bam}
     """
 
@@ -739,7 +739,7 @@ rule collapse_filter_R2:
    R2_filt=temp("02-filtering/{sample}_R2.UMI.ODN.trimmed.filtered.rescued.filtered.fastq.gz"),
    statR2="logs/{sample}/{sample}_umi-odn-shortPairs-r2.rnames",
    statR2filt="logs/{sample}/{sample}_umi-odn-shortPairs-r2-long.rnames"
-  threads: 1
+  threads: 6
   conda: "GENETHOFF"
   params: length=config["minLength"]
   log: "logs/{sample}_R2rescued.UMI.ODN.trimmed.filtered.rescued_filter.log"
@@ -773,7 +773,7 @@ rule sort_rescued_R2:
   threads:6
   params: minMAPQ=config["minMAPQ"]
   shell: """
-    samtools view -b -h  {input} -e '((mapq ==1 && [AS] == [XS]) || (mapq >={params.minMAPQ}))' | samtools sort - > {output}
+    samtools view -@ {threads} -b -h  {input} -e '((mapq ==1 && [AS] == [XS]) || (mapq >={params.minMAPQ}))' | samtools sort - > {output}
     samtools index {output}
   """
 
@@ -848,12 +848,7 @@ rule Collapse_UMI_IS:
         awk '$0 !~ "start" && $7>={params.minReadsPerUMI}' {input} | sort -k1,1 -k2,2n -k3,3n -k4,4 -k5,5 -k 6,6 | bedtools groupby -g 1,2,3,4,5 -c 6,7,6,7,8  -o count_distinct,sum,collapse,collapse,median  | awk 'BEGIN{{OFS="\\t";FS="\\t"}} $6>={params.minUMIPerIS} {{print $1,$2,$3,"ID_"NR,$10,$5,$4,$6,$7,$8,$9}}'   |   sort -k1,1 -k2,2n -k3,3n | bedtools cluster -d {params.window} > {output.collapse}
 
         """
-    
-
-
-
-
-    
+     
 rule get_fasta_around_is:
     input: 
       bed=rules.Collapse_UMI_IS.output.collapse,
@@ -908,7 +903,7 @@ rule predict_offtarget_SWOffinder:
         PAM=lambda wildcards:wildcards.pam,
         PAM_side=lambda wildcards:wildcards.side,
         SWoffFinder=config["SWoffFinder"]["path"]
-    threads: 12
+    threads: workflow.cores
     shell: """
         if [ {params.bulges} = TRUE ] ; 
         then 
@@ -954,7 +949,7 @@ rule annotate_clusters:
 rule match_gRNA_clusters:
   input: rules.get_fasta_around_is.output.fa, rules.annotate_clusters.output 
   output: "05-Report/{sample}_summary_grna.csv"
-  threads: 1
+  threads: 2
   conda: "GENETHOFF"
   params: gRNA_seq=lambda wildcards:samples["gRNA_sequence"][wildcards.sample], 
      gRNA_name=lambda wildcards:samples["gRNA_name"][wildcards.sample],
@@ -988,48 +983,17 @@ rule prepare_tables:
         
         """
 
-# rule readFate:
-#   input:
-#     r2_mapped=rules.callIS_R2rescued.output.stat, 
-#     r2_rescued=rules.collapse_filter_R2.output.statR2,
-#     r2_rescued_filt=rules.collapse_filter_R2.output.statR2filt,
-#     pairs_map=rules.call_IS.output.stat_map,
-#     pair_unmap=rules.alignOnGenome.output.stat_unmap,
-#     pairs_long=rules.filter_reads.output.stat_long,
-#     pairs_odn=rules.trim_ODN.output.stat,
-#     pairs_umi=rules.add_UMI.output.stat,
-#     raw="00-demultiplexing/{sample}_R1.fastq.gz"
-   
-   
-#   output: fate="logs/{sample}/{sample}_readFate.csv"
-#   conda: "GENETHOFF"
-#   shell: """
-#       python ../00-pipeline/readFateCollapse.py --init -o {output.fate} {output.stat}
-#           python ../00-pipeline/readFateCollapse.py --step "has_UMI" -o {output.fate} {output.stat}
-
-#           python ../00-pipeline/readFateCollapse.py --step "has_ODN" -o {output.fate} {output.stat}
-
-#             python ../00-pipeline/readFateCollapse.py --step "is_long_pair" -o {output.fate} {output.stat_long}
-#                           python ../00-pipeline/readFateCollapse.py --step "is_unmapped_pair" -o {output.fate} {output.stat_unmap}
-#         python ../00-pipeline/readFateCollapse.py --step "is_mapped_pair" -o {output.fate} {output.stat_map}
-#       python ../00-pipeline/readFateCollapse.py --step "is_R2rescued" -o {output.fate} {output.statR2}
-#     python ../00-pipeline/readFateCollapse.py --step "R2rescued_passLength" -o {output.fate} {output.statR2filt}
-#         python ../00-pipeline/readFateCollapse.py --step "is_map_R2rescued" -o {output.fate} {output.stat}
-#   """
-
-
-
 rule make_report:
     input:  rules.prepare_tables.output.report_rdata
-    output: report_html="results/"+os.path.basename(os.getcwd())+"_report.html",report_pdf="results/"+os.path.basename(os.getcwd())+"_report.pdf"
+    output: report_html="results/"+os.path.basename(os.getcwd())+"_report.html"#,report_pdf="results/"+os.path.basename(os.getcwd())+"_report.pdf"
     conda: "GENETHOFF"
     params: config_path=config_file_path
     threads: 1
     shell: """
         Rscript {workflow.basedir}/publish_report.r {input} {params.config_path} {output.report_html} {workflow.basedir}
-        Rscript {workflow.basedir}/publish_report_pdf.r {input} {params.config_path} {output.report_pdf} {workflow.basedir}
-    """
 
+    """
+        #Rscript {workflow.basedir}/publish_report_pdf.r {input} {params.config_path} {output.report_pdf} {workflow.basedir}
 onsuccess:
     print("Workflow finished, no error")
     shell("conda run -n GENETHOFF bash {workflow.basedir}/../02-ressources/success.sh")
