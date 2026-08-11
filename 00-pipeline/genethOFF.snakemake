@@ -19,7 +19,6 @@ from collections import defaultdict
 from snakemake.utils import min_version
 min_version("9.3.0")
 
-
 RED= "\033[91m"
 GREEN= "\033[92m"
 RESET= "\033[0m"
@@ -322,7 +321,7 @@ rule target:
             ]
         )
 
-     
+
 
 rule get_chrom_length:
     input: lambda wildcards: config["genome"][wildcards.genome]["fasta"]
@@ -423,7 +422,7 @@ rule merge_libraries:
     R1="00-demultiplexing/{sample}_R1.fastq.gz", 
     R2="00-demultiplexing/{sample}_R2.fastq.gz", 
     I3="00-demultiplexing/{sample}_I3.fastq.gz",
-    stat="logs/{sample}/{sample}_raw.rnames"
+    stat="logs/{sample}/00-demux.rnames"
   conda: "GENETHOFF"
   threads: 1
   shell:
@@ -442,12 +441,10 @@ rule make_I2:
     R1="00-demultiplexing/{sample}_R1.fastq.gz"
   output:
     I3=temp("00-demultiplexing/{sample}_I3b.fastq.gz"),
-    stat="logs/{sample}/{sample}_raw.rnames"
   threads: 1
   conda: "GENETHOFF"
   shell: """
     python {workflow.basedir}/../03-misc/extract_I2_from_header.py {input} {output.I3}
-    seqkit fx2tab -n {input.R1} -i > {output.stat}
   """
   
   
@@ -465,7 +462,7 @@ rule add_UMI:
     R1=temp("01-trimming/{sample}_R1.UMI.fastq.gz"),
     R2=temp("01-trimming/{sample}_R2.UMI.fastq.gz"),
     I2=temp("01-trimming/{sample}_I2.UMI.fastq.gz"),
-    stat="logs/{sample}/{sample}_umi.rnames"
+    stat="logs/{sample}/01-umi_Tagged.rnames"
   threads:6
   log: R1="logs/{sample}_R1.UMI.log", R2="logs/{sample}_R2.UMI.log"    
   conda: "GENETHOFF"
@@ -509,7 +506,7 @@ rule trim_ODN:
   output: 
     R1=temp("01-trimming/{sample}_R1.ODN.UMI.fastq.gz"),
     R2=temp("01-trimming/{sample}_R2.ODN.UMI.fastq.gz"),
-    stat="logs/{sample}/{sample}_umi-odn.rnames"
+    stat="logs/{sample}/02-ODN_Trimmed.rnames"
   threads: 6
   log:R1="logs/{sample}_R1.odn.log"
   conda: "GENETHOFF"
@@ -560,8 +557,8 @@ rule filter_reads:
     R2="02-filtering/{sample}_R2.UMI.ODN.trimmed.filtered.fastq.gz",
     R1short=temp("02-filtering/{sample}_R1.UMI.ODN.trimmed.tooshort.fastq.gz"), 
     R2short=temp("02-filtering/{sample}_R2.UMI.ODN.trimmed.tooshort.fastq.gz"),
-    stat_long="logs/{sample}/{sample}_umi-odn-longPairs.rnames",
-    stat_short="logs/{sample}/{sample}_umi-odn-shortPairs.rnames"
+    stat_long="logs/{sample}/03-longPairs.rnames",
+    stat_short="logs/{sample}/04a-shortPairs.rnames"
   threads: 6
   log: "logs/{sample}.filter.log"
   params: length=config["minLength"]
@@ -591,7 +588,7 @@ if (config["aligner"]  == "bowtie2" or config["aligner"]  == "Bowtie2") :
           sam=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sam"),
           R1_unmapped=temp("03-align/{sample}_R1.UMI.ODN.trimmed.unmapped.fastq.gz"),
           R2_unmapped=temp("03-align/{sample}_R2.UMI.ODN.trimmed.unmapped.fastq.gz"),
-          stat_unmap="logs/{sample}/{sample}_umi-odn-longPairs-unmapped.rnames"
+          stat_unmap="logs/{sample}/04b-UnmappedLongPairs.rnames"
         threads: 6
         log: "logs/{sample}.UMI.ODN.trimmed.filtered.align.log"
         conda: "GENETHOFF"
@@ -693,7 +690,7 @@ rule call_IS:
     output: 
       tmp=temp("04-IScalling/{sample}.pebed"), 
       umi="04-IScalling/{sample}.reads_per_UMI_per_IS.bed",
-      stat_map="logs/{sample}/{sample}_umi-odn-longPairs-mapped.rnames",
+      stat_map="logs/{sample}/03a-mappedLongPairs.rnames",
     threads: 1
     conda: "GENETHOFF"
     params: quantif=config["quantification"].lower()
@@ -737,8 +734,8 @@ rule collapse_filter_R2:
   output:
    R2=temp("02-filtering/{sample}_R2.UMI.ODN.trimmed.filtered.rescued.fastq.gz"),
    R2_filt=temp("02-filtering/{sample}_R2.UMI.ODN.trimmed.filtered.rescued.filtered.fastq.gz"),
-   statR2="logs/{sample}/{sample}_umi-odn-shortPairs-r2.rnames",
-   statR2filt="logs/{sample}/{sample}_umi-odn-shortPairs-r2-long.rnames"
+   statR2="logs/{sample}/05-rescuedR2.rnames",
+   statR2filt="logs/{sample}/06-rescuedR2_Long.rnames"
   threads: 6
   conda: "GENETHOFF"
   params: length=config["minLength"]
@@ -782,7 +779,7 @@ rule callIS_R2rescued:
   output: 
     umi="04-IScalling/{sample}_R2rescued.reads_per_UMI_per_IS.bed", 
     tmp=temp("04-IScalling/{sample}_rescueR2.bed"),
-    stat="logs/{sample}/{sample}_umi-odn-shortPairs-r2-long-align.rnames"
+    stat="logs/{sample}/07-RescuedR2Aligned.rnames"
   threads: 1
   conda: "GENETHOFF"
   shell: """
@@ -799,20 +796,6 @@ rule callIS_R2rescued:
       awk 'BEGIN{{OFS="\\t";FS="\\t"}} {{split($4,a,"_"); if($6=="+") print $1,$2,$2,a[1],a[2],a[3],$5,$6; else print $1,$3-1,$3-1,a[1],a[2],a[3],$5,$6}}' {output.tmp} | sort -k1,1 -k2,3n -k6,6 -k8,8 -k5,5 | bedtools groupby -g 1,2,3,6,8,5 -c 4,7 -o count_distinct,median  > {output.umi}
       """ 
 #######################
-
-# rule correct_UMI:
-#     input: 
-#       bed=rules.call_IS.output.umi, 
-#       bed_rescued=lambda wildcards: f"04-IScalling/{wildcards.sample}_rescueR2.bed" if config["rescue_R2"].lower()=="true" and config["quantification"].lower()=="umi" else rules.call_IS.output.umi 
-#     output:  
-#       "04-IScalling/{sample}.reads_per_UMI_per_IS_corrected.bed"
-#     conda: "GENETHOFF"
-#     threads: 2
-#     params: hamming=config["UMI_hamming_distance"], method = config["UMI_deduplication"], rescueR2=config["rescue_R2"].upper()
-#     shell: """
-#         Rscript {workflow.basedir}/correct_umi.R {input.bed} {params.hamming} {params.method} {output} {params.rescueR2}
-#         """
-
 
 rule correct_UMI:
     input: 
@@ -963,11 +946,32 @@ rule match_gRNA_clusters:
   
   """
 
+rule read_fate:
+    input:
+        demux=rules.merge_libraries.output.stat,
+        umi_tagged= rules.add_UMI.output.stat if config["quantification"].lower()=="umi" else [],
+        odn=rules.trim_ODN.output.stat,
+        filtered_long= rules.filter_reads.output.stat_long,
+        filtered_short= rules.filter_reads.output.stat_short,
+        unmapped_pairs=rules.alignOnGenome.output.stat_unmap,
+        aligned_filtered_pairs=rules.call_IS.output.stat_map,
+        rescued_R2=rules.collapse_filter_R2.output.statR2 if config["rescue_R2"].lower()=="true" else [],
+        rescued_R2_filtered=rules.collapse_filter_R2.output.statR2filt if config["rescue_R2"].lower()=="true" else [],
+        rescued_R2_aligned=rules.callIS_R2rescued.output.stat if config["rescue_R2"].lower()=="true" else []
+    output: matrix="logs/{sample}/read_presence.tsv"
+    threads: 1
+    conda: "GENETHOFF"
+    params: "logs/{sample}"
+    shell: """
+      python ../00-pipeline/reads_fate.py --input-dir {params} --output-dir {params}
+    
+    """
 
 
 rule prepare_tables:
     input: summaries= ["05-Report/{sample}_summary_grna.csv".format(sample=sample) for sample in samples_unique], 
-     stats= ["05-Report/{sample}.stat".format(sample=sample) for sample in samples_unique]
+     stats= ["05-Report/{sample}.stat".format(sample=sample) for sample in samples_unique],
+     fate=["logs/{sample}/read_presence.tsv".format(sample=sample) for sample in samples_unique]
     output: report_rdata= "results/report.rdata", libraries_xlsx="results/"+os.path.basename(os.getcwd())+".xlsx"
     conda: "GENETHOFF"
     threads: 1
@@ -980,7 +984,6 @@ rule prepare_tables:
         mkdir -p results/report-files/;
         
         Rscript {workflow.basedir}/prepare_tables.r "{input.summaries}" {params.sampleInfo} {params.config}  {params.minUMI_alignments_figure} {params.max_clusters} {output.libraries_xlsx}
-        
         """
 
 rule make_report:
