@@ -512,9 +512,10 @@ rule trim_ODN:
   conda: "GENETHOFF"
   message: "removing ODN sequence, discard reads without ODN sequence {wildcards.sample}"
   params: ODN_pos=lambda wildcards: config[samples["type"][wildcards.sample]]["positive"]["R2_leading"],
-    ODN_neg=lambda wildcards: config[samples["type"][wildcards.sample]]["negative"]["R2_leading"]
+    ODN_neg=lambda wildcards: config[samples["type"][wildcards.sample]]["negative"]["R2_leading"],
+    error_rate=config["odn_error_rate"]
   shell: """
-        cutadapt -j {threads} -G "negative={params.ODN_neg};max_error_rate=0;rightmost" -G "positive={params.ODN_pos};max_error_rate=0;rightmost" --discard-untrimmed  --rename='{{id}}_{{r2.adapter_name}}' -o {output.R1} -p {output.R2} {input.R1} {input.R2} > {log.R1}
+        cutadapt -j {threads} -G "negative={params.ODN_neg};max_error_rate={params.error_rate};rightmost" -G "positive={params.ODN_pos};max_error_rate={params.error_rate};rightmost" --discard-untrimmed  --rename='{{id}}_{{r2.adapter_name}}' -o {output.R1} -p {output.R2} {input.R1} {input.R2} > {log.R1}
           
         seqkit fx2tab -n {output.R1} -i > {output.stat}
           """
@@ -536,13 +537,14 @@ rule trim_reads:
     R2_trailing_pos=lambda wildcards: config[samples["type"][wildcards.sample]]["positive"]["R2_trailing"],
     R2_trailing_neg=lambda wildcards: config[samples["type"][wildcards.sample]]["negative"]["R2_trailing"],
     R1_trailing_pos=lambda wildcards: config[samples["type"][wildcards.sample]]["positive"]["R1_trailing"],
-    R1_trailing_neg=lambda wildcards: config[samples["type"][wildcards.sample]]["negative"]["R1_trailing"]
+    R1_trailing_neg=lambda wildcards: config[samples["type"][wildcards.sample]]["negative"]["R1_trailing"],
+    error_rate=config["trim_error_rate"]
   shell: """
         cutadapt -j {threads} \
-          -A "{params.R2_trailing_pos};min_overlap=6;max_error_rate=0.1" \
-          -A "{params.R2_trailing_neg};min_overlap=6;max_error_rate=0.1" \
-          -a "{params.R1_trailing_pos};min_overlap=6;max_error_rate=0.1" \
-          -a "{params.R1_trailing_neg};min_overlap=6;max_error_rate=0.1" \
+          -A "{params.R2_trailing_pos};min_overlap=6;max_error_rate={params.error_rate}" \
+          -A "{params.R2_trailing_neg};min_overlap=6;max_error_rate={params.error_rate}" \
+          -a "{params.R1_trailing_pos};min_overlap=6;max_error_rate={params.error_rate}" \
+          -a "{params.R1_trailing_neg};min_overlap=6;max_error_rate={params.error_rate}" \
           -o {output.R1} -p {output.R2} {input.R1} {input.R2} > {log}
         """
 
