@@ -1,0 +1,88 @@
+reference_genome: /media/References/Human/ensembl/GRCh38/Sequences/Homo_sapiens.GRCh38.dna.primary_assembly_ChrOnly.fa
+
+PAM: NGG
+
+output_folder: paper_revision/output
+
+bwa: bwa
+bedtools: bedtools
+demultiplex_min_reads: 1000
+window_size: 75
+max_mismatches: 7
+
+# parallel
+njobs: 6
+
+undemultiplexed:
+    forward: "/media/Data/gcorre/GENETHOFF/paper_review/Undetermined_R1.fastq.gz"
+    reverse: "/media/Data/gcorre/GENETHOFF/paper_review/Undetermined_R2.fastq.gz"
+    index1: "/media/Data/gcorre/GENETHOFF/paper_review/Undetermined_I1.fastq.gz"
+    index2: "/media/Data/gcorre/GENETHOFF/paper_review/Undetermined_I2.fastq.gz"
+
+samples:
+
+    control:
+        target:
+        barcode1: CGCGCGCG
+        barcode2: CTCTCTAT
+        description:  control
+    B2M_1:
+        target: GAGTAGCGCGAGCACAGCTANGG
+        barcode1: AAAAAAAA
+        barcode2: TAGATCGC
+        description:  B2M
+    B2M_2:
+        target: GAGTAGCGCGAGCACAGCTANGG
+        barcode1: AAAAAAAA
+        barcode2: CTCTCTAT
+        description:  B2M
+    B2M_3:
+        target: GAGTAGCGCGAGCACAGCTANGG
+        barcode1: AAAAAAAA
+        barcode2: ACTGCATA
+        description:  B2M
+    TRAC_1:
+        target: TGTGCTAGACATGAGGTCTANGG
+        barcode1: TTTTTTTT
+        barcode2: GTAAGGAG
+        description:  TRAC
+    TRAC_2:
+        target: TGTGCTAGACATGAGGTCTANGG
+        barcode1: TTTTTTTT
+        barcode2: ACTGCATA
+        description:  TRAC
+    TRAC_3:
+        target: TGTGCTAGACATGAGGTCTANGG
+        barcode1: TTTTTTTT
+        barcode2: TATCCTCT
+        description:  TRAC
+    VEGFAs2_1:
+        target: GACCCCCTCCACCCCGCCTCNGG
+        barcode1: CCCCCCCC
+        barcode2: AGAGTAGA
+        description:  VEGFAs2
+    VEGFAs2_2:
+        target: GACCCCCTCCACCCCGCCTCNGG
+        barcode1: CCCCCCCC
+        barcode2: ACTGCATA
+        description:  VEGFAs2
+    VEGFAs2_3:
+        target: GACCCCCTCCACCCCGCCTCNGG
+        barcode1: CCCCCCCC
+        barcode2: GTAAGGAG
+        description:  VEGFAs2
+    VEGFAs3_1:
+        target: TGTGCTAGACATGAGGTCTANGG
+        barcode1: GGGGGGGG
+        barcode2: GTACCTAG
+        description:  VEGFAs3
+    VEGFAs3_2:
+        target: TGTGCTAGACATGAGGTCTANGG
+        barcode1: GGGGGGGG
+        barcode2: ACTGATGG
+        description:  VEGFAs3
+    VEGFAs3_3:
+        target: TGTGCTAGACATGAGGTCTANGG
+        barcode1: GGGGGGGG
+        barcode2: CAGAGCTA
+        description:  VEGFAs3

@@ -1,0 +1,124 @@
+reference_genome: /app/genome/Homo_sapiens.GRCh38.dna.primary_assembly_ChrOnly.fa
+blacklist: hg38-blacklist.v2.bed.gz
+genome: hg38
+# if not specified, default is NGG
+PAM: NGG
+
+# output folder directory (absolute or relative path), if not specified, default is current dir
+analysis_folder: ./
+
+
+# PATH to analysis tools
+# If not specified, default is just the tool name, i.e., accessible in the $PATH
+bwa: bwa
+samtools: samtools
+bedtools: bedtools
+umi_tools: umi_tools
+
+# optional, to generate the off-target Manhattan plot
+Rscript: Rscript
+
+
+window_size: 25
+max_score: 7
+mapq_threshold: 50
+
+
+# DEMULTIPLEX 
+# ------------
+demultiplex:
+    min_reads: 1
+    mismatch: 1
+    forward: Undetermined_R1.fastq
+    reverse: Undetermined_R2.fastq
+    index1: Undetermined_I1.fastq
+    index2: Undetermined_I2.fastq
+    out_dir: demultiplexed # relative to analysis_folder
+    input_dir: ./ # relative to analysis_folder
+    subsample_reads: -1
+
+samples:
+    B2M-1:
+        target: GAGTAGCGCGAGCACAGCTANGG
+        barcode1: AAAAAAAA
+        barcode2: TAGATCGC
+        controlbarcode1: CGCGCGCG
+        controlbarcode2: CTCTCTAT
+        description:  B2M
+    B2M-2:
+        target: GAGTAGCGCGAGCACAGCTANGG
+        barcode1: AAAAAAAA
+        barcode2: CTCTCTAT
+        controlbarcode1: CGCGCGCG
+        controlbarcode2: CTCTCTAT
+        description:  B2M
+    B2M-3:
+        target: GAGTAGCGCGAGCACAGCTANGG
+        barcode1: AAAAAAAA
+        barcode2: ACTGCATA
+        controlbarcode1: CGCGCGCG
+        controlbarcode2: CTCTCTAT
+        description:  B2M
+    TRAC-1:
+        target: TGTGCTAGACATGAGGTCTANGG
+        barcode1: TTTTTTTT
+        barcode2: GTAAGGAG
+        controlbarcode1: CGCGCGCG
+        controlbarcode2: CTCTCTAT
+        description:  TRAC
+    TRAC-2:
+        target: TGTGCTAGACATGAGGTCTANGG
+        barcode1: TTTTTTTT
+        barcode2: ACTGCATA
+        controlbarcode1: CGCGCGCG
+        controlbarcode2: CTCTCTAT
+        description:  TRAC
+    TRAC-3:
+        target: TGTGCTAGACATGAGGTCTANGG
+        barcode1: TTTTTTTT
+        barcode2: TATCCTCT
+        controlbarcode1: CGCGCGCG
+        controlbarcode2: CTCTCTAT
+        description:  TRAC
+    VEGFAs2-1:
+        target: GACCCCCTCCACCCCGCCTCNGG
+        barcode1: CCCCCCCC
+        barcode2: AGAGTAGA
+        controlbarcode1: CGCGCGCG
+        controlbarcode2: CTCTCTAT
+        description:  VEGFAs2
+    VEGFAs2-2:
+        target: GACCCCCTCCACCCCGCCTCNGG
+        barcode1: CCCCCCCC
+        barcode2: ACTGCATA
+        controlbarcode1: CGCGCGCG
+        controlbarcode2: CTCTCTAT
+        description:  VEGFAs2
+    VEGFAs2-3:
+        target: GACCCCCTCCACCCCGCCTCNGG
+        barcode1: CCCCCCCC
+        barcode2: GTAAGGAG
+        controlbarcode1: CGCGCGCG
+        controlbarcode2: CTCTCTAT
+        description:  VEGFAs2
+    VEGFAs3-1:
+        target: TGTGCTAGACATGAGGTCTANGG
+        barcode1: GGGGGGGG
+        barcode2: GTACCTAG
+        controlbarcode1: CGCGCGCG
+        controlbarcode2: CTCTCTAT
+        description:  VEGFAs3
+    VEGFAs3-2:
+        target: TGTGCTAGACATGAGGTCTANGG
+        barcode1: GGGGGGGG
+        barcode2: ACTGATGG
+        controlbarcode1: CGCGCGCG
+        controlbarcode2: CTCTCTAT
+        description:  VEGFAs3
+    VEGFAs3-3:
+        target: TGTGCTAGACATGAGGTCTANGG
+        barcode1: GGGGGGGG
+        barcode2: CAGAGCTA
+        controlbarcode1: CGCGCGCG
+        controlbarcode2: CTCTCTAT
+        description:  VEGFAs3
